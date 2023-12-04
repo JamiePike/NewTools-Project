@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Assembly of Foc isolates from TNAU</title>
+        <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+        
+    </head>
+    <body class="vscode-body vscode-light">
+        <!----Comments & Links ---->
+<!------------------------->
+<h1 id="assembly-of-foc-isolates-from-tnau">Assembly of Foc isolates from TNAU</h1>
+<h5 id="by-jamie-pike">By Jamie Pike</h5>
+<h2 id="contents">Contents</h2>
+<ul>
+<li><a href="#data-download-and-qc-checks">Data download and QC checks.</a></li>
+<li><a href="#fastqc-checks">FastQC checks:</a></li>
+<li><a href="#bowtie2-mapping-of-raw-reads">Bowtie2 Mapping of raw reads</a></li>
+<li><a href="#searching-unmapped-reads">Searching Unmapped Reads</a>
+<ul>
+<li><a href="#map-to-stenotrophomonas-maltophilia">Map to <em>Stenotrophomonas maltophilia</em></a></li>
+</ul>
+</li>
+<li><a href="#de-novo-assemblies"><em>De novo</em> assemblies</a>
+<ul>
+<li><a href="#isolate-s16">Isolate S16</a></li>
+<li><a href="#for-the-s32-and-s6-assemblies">For the S32 and S6 assemblies:</a></li>
+</ul>
+</li>
+<li><a href="#blobtools-analysis">BlobTools Analysis</a></li>
+</ul>
+<h1 id="data-download-and-qc-checks">Data download and QC checks</h1>
+<p>Isolate raw data supplied on 24/2/23, by Dr Raveendran Muthurajan and downloaded directly from ONEMOMICS via sftp.</p>
+<blockquote>
+<p><img src="file:////Volumes/Jamie_EXT/Research/Genomics/NewToolsProject/FocGenomes/Indian_Genomes/Docs/TNAU-Email.png" alt="Email form Raveendran detailing the source of the TNAU raw read data for download."></p>
+</blockquote>
+<p>Isolates sequenced using ONEOMICS using Illumina 1.9 PE (PLATFORM?)</p>
+<p>Following download, I assessed the quality of each isolate using FastQC, although a QC html is provided by ONEOMCIS and attached to email from Dr Raveendran Muthurajan.</p>
+<h2 id="fastqc-checks">FastQC checks</h2>
+<p>Performed using FastQC (version 0.11.8).</p>
+<h5 id="fastq-s6-1fqgz">FASTQ: S6-1.fq.gz</h5>
+<table>
+<thead>
+<tr>
+<th><strong>GRADE</strong></th>
+<th><strong>TEST</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PASS</td>
+<td>Basic Statistics</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per base sequence quality</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per tile sequence quality</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per sequence quality scores</td>
+</tr>
+<tr>
+<td>FAIL</td>
+<td>Per base sequence content</td>
+</tr>
+<tr>
+<td>FAIL</td>
+<td>Per sequence GC content</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per base N content</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Sequence Length Distribution</td>
+</tr>
+<tr>
+<td>FAIL</td>
+<td>Sequence Duplication Levels</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Overrepresented sequences</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Adapter Content</td>
+</tr>
+</tbody>
+</table>
+<p>S6-1.fq.gz failed for Per base sequence content, Per sequence GC content and Sequence duplication levels.</p>
+<p><strong>Per base sequence content:</strong></p>
+<p><img src="file:////Volumes/Jamie_EXT/Research/Genomics/NewToolsProject/FocGenomes/Indian_Genomes/Docs/S6-1_PerBaseSeqContent.png" alt="Alt text"></p>
+<p>S6-1.fq has a biased sequence in the first ~12 bases. This is commonly observed in RNAseq analysis, as explained <a href="((https://sequencing.qcfail.com/articles/positional-sequence-bias-in-random-primed-libraries/))">here</a>.</p>
+<h5 id="fastq-s6-2fqgz">FASTQ: S6-2.fq.gz</h5>
+<table>
+<thead>
+<tr>
+<th><strong>GRADE</strong></th>
+<th><strong>TEST</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PASS</td>
+<td>Basic Statistics</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per base sequence quality</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per tile sequence quality</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per sequence quality scores</td>
+</tr>
+<tr>
+<td>FAIL</td>
+<td>Per base sequence content</td>
+</tr>
+<tr>
+<td>FAIL</td>
+<td>Per sequence GC content</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per base N content</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Sequence Length Distribution</td>
+</tr>
+<tr>
+<td>WARN</td>
+<td>Sequence Duplication Levels</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Overrepresented sequences</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Adapter Content</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Per base sequence content:</strong></p>
+<p><img src="file:////Volumes/Jamie_EXT/Research/Genomics/NewToolsProject/FocGenomes/Indian_Genomes/Docs/S6-2_PerBaseSeqContent.png" alt="Alt text"></p>
+<p>Similarly, S6-2.fq failed for Per base sequence content, Per sequence GC content and Sequence duplication levels and has a biased sequence in the first ~12 bases.</p>
+<p>The same was observed for S16 and S32. See the tables below and the HTML outputs:</p>
+<p><code>/Users/u1983390/Library/CloudStorage/OneDrive-UniversityofWarwick/Research/Genomics/NewToolsProject/Indian-Foc-Genome/Indian Foc Genomes-Feb23/QC-Analysis</code></p>
+<h5 id="fastq-s16-1fqgz">FASTQ: S16-1.fq.gz</h5>
+<table>
+<thead>
+<tr>
+<th><strong>GRADE</strong></th>
+<th><strong>TEST</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PASS</td>
+<td>Basic Statistics</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per base sequence quality</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per tile sequence quality</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per sequence quality scores</td>
+</tr>
+<tr>
+<td>WARN</td>
+<td>Per base sequence content</td>
+</tr>
+<tr>
+<td>FAIL</td>
+<td>Per sequence GC content</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per base N content</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Sequence Length Distribution</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Sequence Duplication Levels</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Overrepresented sequences</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Adapter Content</td>
+</tr>
+</tbody>
+</table>
+<h5 id="fastq-s16-2fqgz">FASTQ: S16-2.fq.gz</h5>
+<table>
+<thead>
+<tr>
+<th><strong>GRADE</strong></th>
+<th><strong>TEST</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PASS</td>
+<td>Basic Statistics</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per base sequence quality</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per tile sequence quality</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per sequence quality scores</td>
+</tr>
+<tr>
+<td>WARN</td>
+<td>Per base sequence content</td>
+</tr>
+<tr>
+<td>FAIL</td>
+<td>Per sequence GC content</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per base N content</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Sequence Length Distribution</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Sequence Duplication Levels</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Overrepresented sequences</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Adapter Content</td>
+</tr>
+</tbody>
+</table>
+<h5 id="fastq-s32-1fqgz">FASTQ: S32-1.fq.gz</h5>
+<table>
+<thead>
+<tr>
+<th><strong>GRADE</strong></th>
+<th><strong>TEST</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PASS</td>
+<td>Basic Statistics</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per base sequence quality</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per tile sequence quality</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per sequence quality scores</td>
+</tr>
+<tr>
+<td>WARN</td>
+<td>Per base sequence content</td>
+</tr>
+<tr>
+<td>FAIL</td>
+<td>Per sequence GC content</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per base N content</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Sequence Length Distribution</td>
+</tr>
+<tr>
+<td>FAIL</td>
+<td>Sequence Duplication Levels</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Overrepresented sequences</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Adapter Content</td>
+</tr>
+</tbody>
+</table>
+<h5 id="fastq-s32-2fqgz">FASTQ: S32-2.fq.gz</h5>
+<table>
+<thead>
+<tr>
+<th><strong>GRADE</strong></th>
+<th><strong>TEST</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PASS</td>
+<td>Basic Statistics</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per base sequence quality</td>
+</tr>
+<tr>
+<td>WARN</td>
+<td>Per tile sequence quality</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per sequence quality scores</td>
+</tr>
+<tr>
+<td>WARN</td>
+<td>Per base sequence content</td>
+</tr>
+<tr>
+<td>FAIL</td>
+<td>Per sequence GC content</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Per base N content</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Sequence Length Distribution</td>
+</tr>
+<tr>
+<td>FAIL</td>
+<td>Sequence Duplication Levels</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Overrepresented sequences</td>
+</tr>
+<tr>
+<td>PASS</td>
+<td>Adapter Content</td>
+</tr>
+</tbody>
+</table>
+<p>After speaking to Dr Laura Baxter about the Per base sequence content, she advised not trimming and continuing with assembly. Additionally, she warned me to be careful of the Per sequence GC content, as most do not follow a completely normal distribution and have a very narrow peak in the centre.</p>
+<hr>
+<p><strong>From:</strong> Baxter, Laura &lt;[Laura.Baxter@warwick.ac.uk&gt;(<a href="mailto:Laura.Baxter@warwick.ac.uk">mailto:Laura.Baxter@warwick.ac.uk</a>)&gt;
+<strong>Date:</strong> Friday, 24 February 2023 at 15:31
+<strong>To:</strong>  PIKE, JAMIE (PGR) &lt;<a href="mailto:Jamie.Pike@warwick.ac.uk">Jamie.Pike@warwick.ac.uk</a>&gt;
+<strong>Subject:</strong> Re: FastQC Per base sequence content advice</p>
+<p><em>Hi Jamie,</em></p>
+<p><em>I agree with what you've found - I often see this not-so-random sequence bias at the start of RNA seq data and don't consider it a problem. It's less common in WGS data but I think essentially it will be the same/similar issue, probably down to the library preparation steps. It would be interesting/useful to know what method/kit they used.</em></p>
+<p><em>I wouldn't trim, as they aren't sequencing errors as such, and if you hard trim the first 10 bases you'll lose ~7% your data.</em></p>
+<p><em>The per sequence GC content is a bit odd, in that it has a very narrow peak centred around 67% (however, this might be normal for your genome's GC content), but also there's a small 'shoulder' around 50% (again, this might be a biological feature of your genome, if there's say one chromosome with a very different GC content to the rest, or it might be an indicator of reads from different contaminant species being present).</em></p>
+<p><em>I say proceed with the untrimmed data as the quality is high and there's no adapter etc, keeping an eye out for any contaminants.</em></p>
+<p><em>Is this fusarium data, and are you doing a de novo assembly, or reference-guided?</em></p>
+<p><em>Cheers,</em></p>
+<p><em>Laura</em></p>
+<hr>
+<p>I continued without trimming, as recommended, and aligned the isolates to the reference quality <em>Foc</em> TR4 assembly from David Studholme's group. I will use the % mapping and blast searching of unmapped reads to gauge the level of contamination and subsequent assembly approach.</p>
+<h1 id="bowtie2-mapping-of-raw-reads">Bowtie2 Mapping of raw reads</h1>
+<p>In the <code>Bowtie2Mapping</code> directory:</p>
+<p>Vettel:
+<code>/home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/Bowtie2Mapping</code></p>
+<p>Bowtie2 version: 2.4.5</p>
+<p>An index directory was created for the <em>Foc</em> TR4 reference assembly GCA-007994515.1-UK0001: <code>UK0001-Index.</code></p>
+<p>And then the reference assembly was indexed for Bowtie2 using the following command in the conda AlignEnv:</p>
+<pre><code class="language-bash">bowtie2-build F._oxysporum_f._sp._cubense_UK0001.fna UK0001_bowtie2
+</code></pre>
+<p>A directory was created for each isolate within the Bowtie2Mapping directory for the SAM output. The following command was then run for each isolate in the corresponding directory:</p>
+<pre><code class="language-bash"><span class="hljs-built_in">nohup</span> ../Bowtie2Command.sh [Path/to/fastq_1] [Path/to/fastq_2] 1&gt;Bowtie_S[X].<span class="hljs-built_in">log</span> &amp;
+</code></pre>
+<p>The <code>Bowtie2Command.sh</code> file contains:</p>
+<pre><code class="language-bash"><span class="hljs-meta">#!/bin/bash</span>
+
+One=<span class="hljs-variable">${1}</span> <span class="hljs-comment">#Where One is the first fastq.</span>
+
+Two=<span class="hljs-variable">${2}</span> <span class="hljs-comment">#Where Two is the second fastq.</span>
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Bowtie2 Mapping&quot;</span>
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;---------------&quot;</span>
+
+<span class="hljs-built_in">echo</span> $(<span class="hljs-built_in">date</span>)
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+<span class="hljs-comment">#Perform Bowtie2 Mapping using UK0001 TR4 as the reference.</span>
+
+bowtie2 --<span class="hljs-built_in">local</span> -x /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/Bowtie2Mapping/UK0001_Index/UK0001_bowtie2 -1 <span class="hljs-variable">$One</span> -2 <span class="hljs-variable">$Two</span> -S ./S16_MappedTo_UK0001.sam
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+<span class="hljs-comment">#Send email notification of job completion.</span>
+
+SendEmail.py <span class="hljs-string">&quot;Bowtie2 Complete&quot;</span> <span class="hljs-string">&quot;Bowtie2 Mapping complete. Check for results.&quot;</span>
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+</code></pre>
+<p>The Results of BOWTIE2 mapping of raw reads:</p>
+<p><strong>S6</strong></p>
+<p>Command:</p>
+<pre><code class="language-bash"><span class="hljs-built_in">nohup</span> ../Bowtie2Command.sh /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/rawdata/S6/S6_1.fq.gz /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/rawdata/S6/S6_2.fq.gz 1&gt;Bowtie2_S6.<span class="hljs-built_in">log</span> &amp;
+</code></pre>
+<p>Bowtie2_S6.log:</p>
+<pre><code class="language-bash">==================================================================
+
+Bowtie2 Mapping
+
+---------------
+
+Wed 1 Mar 16:43:38 GMT 2023
+
+==================================================================
+
+26213258 reads; of these:
+
+26213258 (100.00%) were paired; of these:
+
+24042619 (91.72%) aligned concordantly 0 <span class="hljs-built_in">times</span>
+
+1935086 (7.38%) aligned concordantly exactly 1 time
+
+235553 (0.90%) aligned concordantly &gt;1 <span class="hljs-built_in">times</span>
+
+----
+
+24042619 pairs aligned concordantly 0 <span class="hljs-built_in">times</span>; of these:
+
+52956 (0.22%) aligned discordantly 1 time
+
+----
+
+23989663 pairs aligned 0 <span class="hljs-built_in">times</span> concordantly or discordantly; of these:
+
+47979326 mates make up the pairs; of these:
+
+47857196 (99.75%) aligned 0 <span class="hljs-built_in">times</span>
+
+37425 (0.08%) aligned exactly 1 time
+
+84705 (0.18%) aligned &gt;1 <span class="hljs-built_in">times</span>
+
+8.72% overall alignment rate
+
+==================================================================
+
+Sending job status email...
+
+==================================================================
+</code></pre>
+<p><strong>S16</strong></p>
+<p>Command:</p>
+<pre><code class="language-bash"><span class="hljs-built_in">nohup</span> ../Bowtie2Command.sh /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/rawdata/S16/S16_1.fq.gz /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/rawdata/S16/S16_2.fq.gz 1&gt;Bowtie_S16.<span class="hljs-built_in">log</span> &amp;
+</code></pre>
+<p>Bowtie2_S16.log:</p>
+<pre><code class="language-bash">====================================================================
+
+Bowtie2 Mapping
+
+---------------
+
+Wed 1 Mar 09:36:59 GMT 2023
+
+====================================================================
+
+22473220 reads; of these:
+
+22473220 (100.00%) were paired; of these:
+
+11044640 (49.15%) aligned concordantly 0 <span class="hljs-built_in">times</span>
+
+10676063 (47.51%) aligned concordantly exactly 1 time
+
+752517 (3.35%) aligned concordantly &gt;1 <span class="hljs-built_in">times</span>
+
+----
+
+11044640 pairs aligned concordantly 0 <span class="hljs-built_in">times</span>; of these:
+
+272737 (2.47%) aligned discordantly 1 time
+
+----
+
+10771903 pairs aligned 0 <span class="hljs-built_in">times</span> concordantly or discordantly; of these:
+
+21543806 mates make up the pairs; of these:
+
+20761361 (96.37%) aligned 0 <span class="hljs-built_in">times</span>
+
+552679 (2.57%) aligned exactly 1 time
+
+229766 (1.07%) aligned &gt;1 <span class="hljs-built_in">times</span>
+
+53.81% overall alignment rate
+
+====================================================================
+
+Sending job status email...
+
+====================================================================
+</code></pre>
+<p><strong>S32</strong></p>
+<p>Command:</p>
+<pre><code class="language-bash"><span class="hljs-built_in">nohup</span> ../Bowtie2Command.sh /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/rawdata/S32/S32_1.fq.gz /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/rawdata/S32/S32_2.fq.gz 1&gt;Bowtie_S32.<span class="hljs-built_in">log</span> &amp;
+</code></pre>
+<p>Bowtie2_S32.log:</p>
+<pre><code class="language-bash">====================================================================
+
+Bowtie2 Mapping
+
+---------------
+
+Wed 1 Mar 14:04:56 GMT 2023
+
+====================================================================
+
+34526189 reads; of these:
+
+34526189 (100.00%) were paired; of these:
+
+29377154 (85.09%) aligned concordantly 0 <span class="hljs-built_in">times</span>
+
+4873959 (14.12%) aligned concordantly exactly 1 time
+
+275076 (0.80%) aligned concordantly &gt;1 <span class="hljs-built_in">times</span>
+
+----
+
+29377154 pairs aligned concordantly 0 <span class="hljs-built_in">times</span>; of these:
+
+124174 (0.42%) aligned discordantly 1 time
+
+----
+
+29252980 pairs aligned 0 <span class="hljs-built_in">times</span> concordantly or discordantly; of these:
+
+58505960 mates make up the pairs; of these:
+
+58215294 (99.50%) aligned 0 <span class="hljs-built_in">times</span>
+
+170055 (0.29%) aligned exactly 1 time
+
+120611 (0.21%) aligned &gt;1 <span class="hljs-built_in">times</span>
+
+15.69% overall alignment rate
+
+====================================================================
+
+Sending job status email...
+
+====================================================================
+</code></pre>
+<h1 id="searching-unmapped-reads">Searching Unmapped Reads</h1>
+<p>SAM files were downloaded onto my local machine and converted from SAM to BAM. Unmapped reads were then extracted and searched using the BLAST web server.</p>
+<p>Local Path:</p>
+<pre><code class="language-bash">/Volumes/Jamie_EXT/Research/Genomics/NewToolsProject/FocGenomes/Indian_Genomes/Bowtie2Mapping/S*
+</code></pre>
+<p>Command example:</p>
+<pre><code class="language-bash">samtools view –S –b S16_MappedTo_UK0001.sam &gt; S16_MappedTo_UK0001.bam
+
+samtools fasta -f 4 S16_MappedTo_UK0001.bam &gt; S16_MappedTo_UK0001_UnmappedReads.fasta
+
+<span class="hljs-comment">#The fasta file was chuncked using the following command for BLAST searching.</span>
+
+awk <span class="hljs-string">&#x27;BEGIN {n=0;} /^&gt;/ {if(n%500==0){file=sprintf(&quot;S6_UNmappedReads_UK0001-chunk%d.fa&quot;,n);} print &gt;&gt; file; n++; next;} { print &gt;&gt; file; }&#x27;</span> &lt; ../S16_MappedTo_UK0001_UnmappedReads.fasta
+</code></pre>
+<p>For isolates S6 and S32, the majority of hits were for <em>Stenotrophomonas</em> species, particularly <em>Stenotrophomonas maltophilia</em>. A reference assembly for <em>Stenotrophomonas maltophilia</em> was therefore downloaded from GenBank.</p>
+<h2 id="map-to-stenotrophomonas-maltophilia">Map to <em>Stenotrophomonas maltophilia</em></h2>
+<p>Reference Assembly: <a href="https://www.ncbi.nlm.nih.gov/data-hub/genome/GCF_900475405.1/">GCA_900475405.1</a></p>
+<p>The reference assembly was indexed for Bowtie2 mapping in the following Vettle directory:</p>
+<p><code>/home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/Bowtie2Mapping/S.maltophilia_44087_C01_Index</code></p>
+<pre><code class="language-bash">bowtie2-build Stenotrophomonas_maltophilia_44087_C01_reference.fna S_maltophilia__ref-bowtie2
+</code></pre>
+<p>S6, S16 and S32 were then mapped to the <em>Stenotrophomonas maltophilia</em> reference using the <a href="http://Bowtie2Command.sh">Bowtie2Command.sh</a> file:</p>
+<pre><code class="language-bash"><span class="hljs-meta">#!/bin/bash</span>
+
+One=<span class="hljs-variable">${1}</span> <span class="hljs-comment">#Where One is the first fastq.</span>
+
+Two=<span class="hljs-variable">${2}</span> <span class="hljs-comment">#Where two is the second fastq.</span>
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Bowtie2 Mapping&quot;</span>
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;---------------&quot;</span>
+
+<span class="hljs-built_in">echo</span> $(<span class="hljs-built_in">date</span>)
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+<span class="hljs-comment">#Perform Bowtie2 Mapping using S. maltophilia as the reference.</span>
+
+bowtie2 --<span class="hljs-built_in">local</span> -x /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/Bowtie2Mapping/S.maltophilia_44087_C01_Index/S_maltophilia__ref-bowtie2 -1 <span class="hljs-variable">$One</span> -2 <span class="hljs-variable">$Two</span> -S ./S6_MappedTo_S_maltophilia__ref.sam
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+<span class="hljs-comment">#Send email notifciation of job completion.</span>
+
+SendEmail.py <span class="hljs-string">&quot;Bowtie2 Complete&quot;</span> <span class="hljs-string">&quot;Bowtie2 Mapping complete. Check for results.&quot;</span>
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+S6, S16 and S32 were <span class="hljs-keyword">then</span> mapped to the _Fusarium sacchari_ FS66 reference using the Bowtie2Command.sh file:
+
+<span class="hljs-comment">#!/bin/bash</span>
+
+One=<span class="hljs-variable">${1}</span> <span class="hljs-comment">#Where One is the first fastq.</span>
+
+Two=<span class="hljs-variable">${2}</span> <span class="hljs-comment">#Where two is the second fastq.</span>
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Bowtie2 Mapping&quot;</span>
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;---------------&quot;</span>
+
+<span class="hljs-built_in">echo</span> $(<span class="hljs-built_in">date</span>)
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+<span class="hljs-comment">#Perform Bowtie2 Mapping using S. maltophilia as the reference.</span>
+
+bowtie2 --<span class="hljs-built_in">local</span> -x /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/Bowtie2Mapping/F._fujikuori_FS66_Index/F.fujikuroi-bowtie2 -1 <span class="hljs-variable">$One</span> -2 <span class="hljs-variable">$Two</span> | samtools view -Shu | samtools <span class="hljs-built_in">sort</span> -o S32_mappedto_FS66.bam
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+<span class="hljs-comment">#Send email notifciation of job completion.</span>
+
+SendEmail.py <span class="hljs-string">&quot;Bowtie2 Complete&quot;</span> <span class="hljs-string">&quot;Bowtie2 Mapping complete. Check for results.&quot;</span>
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+</code></pre>
+<p>The following mapping rates are recorded in the corresponding log files.</p>
+<table>
+<thead>
+<tr>
+<th>Species</th>
+<th>S6 Bowtie2 AlignmentRate</th>
+<th>S16 Bowtie2 AlignmentRate</th>
+<th>S32 Bowtie2 AlignmentRate</th>
+<th>Strain</th>
+<th>GenBank  Accession</th>
+<th>No. of Contigs</th>
+<th>Contig N50 (Mb)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F. oxysporum f. sp. cubense (TR4)</td>
+<td>8.72%</td>
+<td>53.81%</td>
+<td>15.69%</td>
+<td>UK0001</td>
+<td>GCA_007994515.1</td>
+<td>15</td>
+<td>4.49</td>
+</tr>
+<tr>
+<td>F. sacchari</td>
+<td>5.24%</td>
+<td>68.65%</td>
+<td>22.49%</td>
+<td>FS66</td>
+<td>GCA_017165645.1</td>
+<td>48</td>
+<td>1.97</td>
+</tr>
+<tr>
+<td>Stenotrophomonas maltophilia</td>
+<td>49.32%</td>
+<td>0.01%</td>
+<td>53.93%</td>
+<td>NCTC10258</td>
+<td>GCA_900475405.1</td>
+<td>1</td>
+<td>4.5</td>
+</tr>
+</tbody>
+</table>
+<p>As S6 had a 49.32% mapping rate to the <em>Stenotrophomonas maltophilia</em> reference, unmapped reads were extracted into a fasta file and searched using web BLAST against the NCBI database using the same approach as pg 9 (original BLAST search of unmapped reads).</p>
+<p><code>/Volumes/Jamie_EXT/Research/Genomics/NewToolsProject/FocGenomes/Indian_Genomes/Bowtie2Mapping/S6/S6_UNmappedReads_S_maltophilia-ChunkedFastas/</code></p>
+<p>Hits are mixed, with some for <em>Fusarium</em> species, and others for <em>Stenotrophomonas</em> species and <em>Achromobacter</em> species.</p>
+<p>The S16 reads which did not map to <em>FS66</em> were extracted and searched against the NCBI database using web BLAST. A lot of the searches had no significant similarity found, which is curious – many of the sequences which did have hits were for <em>Fusarium</em> species. I will therefore generate a <em>de novo</em> assembly for S16 and will then extract the TEF1-a region as well as perform a Blobltools analysis.</p>
+<h1 id="de-novo-assemblies"><em>De novo</em> assemblies</h1>
+<h3 id="isolate-s16">Isolate S16</h3>
+<p>SPAdes was used to generate the S16 <em>de novo</em> assembly, as it was for the SY-2 assembly prepared in 2022. The SPAdes assembly was generated in the following directory:</p>
+<p><code>/home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S16 </code></p>
+<p>Using the following command:</p>
+<pre><code class="language-bash"><span class="hljs-built_in">nohup</span> ./SPAdesAssembly-S16.sh 1&gt;S16_SpadesAssembly.<span class="hljs-built_in">log</span> &amp;
+</code></pre>
+<p>Where <code>SPAdesAssembly-S16.sh</code> contains:</p>
+<pre><code class="language-bash"><span class="hljs-meta">#!/bin/bash</span>
+
+<span class="hljs-comment">#Command used to generate the S16 SPAdes Assembly</span>
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;S16 Spades Assembly&quot;</span>
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;-------------------&quot;</span>
+
+<span class="hljs-built_in">echo</span> $(<span class="hljs-built_in">date</span>)
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+<span class="hljs-comment">#Run the Spades command.</span>
+
+spades.py -1 /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/rawdata/S16/S16_1.fq.gz -2 /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/rawdata/S16/S16_2.fq.gz --careful –isolate --cov-cutoff auto -o /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S16/
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+<span class="hljs-comment">#Send an email notification of job completion.</span>
+
+SendEmail.py <span class="hljs-string">&quot;S16 SPAdes Assembly Complete&quot;</span> <span class="hljs-string">&quot;Spades assembly for S16 is now complete. Please check: /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S16/ for the results.&quot;</span>
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+</code></pre>
+<p>Quality of the S16 assembly was assessed using the following commands:</p>
+<pre><code class="language-bash"><span class="hljs-built_in">nohup</span> ../AssemblyQualityCheck.sh contigs.fasta 1&gt;AssemblyQualityCheck.<span class="hljs-built_in">log</span> &amp;
+</code></pre>
+<p>Output can be found in the following directories:</p>
+<p><code>/home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S16/QuastResult</code></p>
+<p>Like the SY-2 assembly, there is not a normal distribution of GC content contigs. Overall GC content is 46.28%. Some contigs have a low GC content. Therefore, alike the SY-2 isolate, low GC contigs were removed using the <code>gcTrimmer.py</code> script with a 25% GC threshold.</p>
+<p><strong>BUSCO is 97%.</strong></p>
+<p><img src="file:////Volumes/Jamie_EXT/Research/Genomics/NewToolsProject/FocGenomes/Indian_Genomes/Docs/S16_GC_Content.png" alt="Alt text"></p>
+<p>After running <code>gcTrimmer.py</code>, the gc trimmed fasta was assessed using Quast and BUSCO.</p>
+<p><code>gcTrimmer.py</code> command:</p>
+<pre><code class="language-bash">gcTrimmer.py contigs.fasta 25
+</code></pre>
+<p>Assembly Quality Check:</p>
+<pre><code class="language-bash"><span class="hljs-built_in">nohup</span> ../AssemblyQualityCheck.sh contigs.fasta_GCcontentAbove25perc.fasta 1&gt;AssemblyQualityCheck_GCTrimmed-25perc.<span class="hljs-built_in">log</span> &amp;
+</code></pre>
+<p>In:</p>
+<p><code>/home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S16</code></p>
+<p>The GC trimmed assembly has reduced the number of contigs from 1666 to 768. BUSCO remains at 97.5% and the low GC hip has been removed from the GC% plot. Further, GC% has increased to 47.53.</p>
+<p>Next, the raw reads were aligned to the SPAdes GC-Trimmed assembly using Bowtie2.</p>
+<p>First, a Bowtie2 index was generated for the SPAdes GC-Trimmed assembly:</p>
+<pre><code class="language-bash">bowtie2-build S16_GC-Trimmed.fasta S16_GC-Trimmed.bowtie2
+</code></pre>
+<p>Then the following script and commands used to run Bowtie2:</p>
+<pre><code class="language-bash"><span class="hljs-built_in">nohup</span> ./Bowtie2Command.sh /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/rawdata/S16/S16_1.fq.gz /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/rawdata/S16/S16_2.fq.gz 1&gt;Bowtie2_S16RawReads_MappedTo_S16GC-TrimmedAssemb.<span class="hljs-built_in">log</span> &amp;
+</code></pre>
+<pre><code class="language-bash"><span class="hljs-meta">#!/bin/bash</span>
+
+One=<span class="hljs-variable">${1}</span> <span class="hljs-comment">#Where One is the first fastq.</span>
+
+Two=<span class="hljs-variable">${2}</span> <span class="hljs-comment">#Where two is the second fastq.</span>
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Bowtie2 Mapping&quot;</span>
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;---------------&quot;</span>
+
+<span class="hljs-built_in">echo</span> $(<span class="hljs-built_in">date</span>)
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+<span class="hljs-comment">#Perform Bowtie2 Mapping using S. maltophilia as the reference.</span>
+
+bowtie2 --<span class="hljs-built_in">local</span> -x /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S16/Mapping/Bowtie2Index/S16_GC-Trimmed.bowtie2 -1 <span class="hljs-variable">$One</span> -2 <span class="hljs-variable">$Two</span> | samtools view -Shu | samtools <span class="hljs-built_in">sort</span> -o S16RawReads_Mappedto_S16GC-TrimmedAssemb.bam
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+<span class="hljs-comment">#Send email notifciation of job completion.</span>
+
+SendEmail.py <span class="hljs-string">&quot;Bowtie2 Complete&quot;</span> <span class="hljs-string">&quot;Bowtie2 Mapping complete. Check for results.&quot;</span>
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+</code></pre>
+<p>I then ran Qualimap bamQC to determine coverage etc using the following commands and scripts in the directory below:</p>
+<p><code>/home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S16/Mapping/BamQC</code></p>
+<p>Mean Coverage is 148.8038x - other data can be found:</p>
+<p><code>/Users/jamiepike/Library/CloudStorage/OneDrive-UniversityofWarwick/Research/Genomics/NewToolsProject/Indian_Foc_Genome/Indian Foc Genomes_Feb23/Assemblies/S16/Mapping</code></p>
+<h1 id="blobtools-analysis">BlobTools Analysis</h1>
+<p>Directory:</p>
+<p><code>/home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S16/Blobtools</code></p>
+<p>The BlobTools analysis was conducted on the <em>de novo</em> S16 assembly to look for contamination, as was performed for the SY-2 isolate.</p>
+<p>The BAM input required for BlobTools (raw S16 reads mapped back to assembly) has already been generated, as has the S16 <em>de novo</em> assembly. The preliminary BLAST search required for BlobTools was then conducted using the recommended BLAST search parameters from <a href="https://blobtools.readme.io/docs/taxonomy-file">BlobTools</a>  and the following command:</p>
+<pre><code class="language-bash"><span class="hljs-built_in">nohup</span> ./BlobtoolsCommand.sh /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S16/S16_GC-Trimmed.fasta /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S16/Mapping/S16RawReads_Mappedto_S16GC-TrimmedAssemb.bam TNAU_S16 1&gt;BlobtoolsS16.<span class="hljs-built_in">log</span> &amp;
+</code></pre>
+<p>Script:</p>
+<pre><code class="language-bash"><span class="hljs-meta">#!/bin/bash</span>
+
+Assemb=<span class="hljs-variable">${1?Please provide the assembly input fasta.}</span> <span class="hljs-comment">#Input Assembly.</span>
+
+Bam=<span class="hljs-variable">${2?Please provide a bam file of raw reads mapped back to the assembly}</span> <span class="hljs-comment">#Input BAM.</span>
+
+prefix=<span class="hljs-variable">${3?Please provide a prefix for you outputs.}</span>
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Blobtools BLAST&quot;</span>
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;---------------&quot;</span>
+
+<span class="hljs-built_in">echo</span> $(<span class="hljs-built_in">date</span>)
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Blasting...&quot;</span>
+
+<span class="hljs-comment">#Perform BLASTN for Blobtools.</span>
+
+blastn -task megablast -query <span class="hljs-variable">${Assemb}</span> -db /shared/reference/NCBI_NT/BLASTDB/nt -outfmt <span class="hljs-string">&#x27;6 qseqid staxids bitscore std&#x27;</span> -max_target_seqs 1 -max_hsps 1 -num_threads 16 -evalue 1e-25 -out <span class="hljs-variable">${prefix}</span>.vs.nt.mts1.hsp1.1e25.megablast.out
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Running Blobtools...&quot;</span>
+
+<span class="hljs-comment">#Perform the Blobtools Analysis</span>
+
+/home/u1983390/apps/blobtools/blobtools create -i <span class="hljs-variable">${Assemb}</span> -b <span class="hljs-variable">${Bam}</span> -t <span class="hljs-variable">${prefix}</span>.vs.nt.mts1.hsp1.1e25.megablast.out -o <span class="hljs-variable">${prefix}</span>.blobtools
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Generating Blobtools figures...&quot;</span>
+
+<span class="hljs-comment">#To view results.</span>
+
+/home/u1983390/apps/blobtools/blobtools view -i <span class="hljs-variable">${prefix}</span>.blobtools.blobDB.json -r species
+
+/home/u1983390/apps/blobtools/blobtools view -i <span class="hljs-variable">${prefix}</span>.blobtools.blobDB.json -r phylum
+
+<span class="hljs-comment">#To generate graphs.</span>
+
+/home/u1983390/apps/blobtools/blobtools plot -i <span class="hljs-variable">${prefix}</span>.blobtools.blobDB.json -r species
+
+/home/u1983390/apps/blobtools/blobtools plot -i <span class="hljs-variable">${prefix}</span>.blobtools.blobDB.json -r phylum
+
+<span class="hljs-comment">#To generate PDF versions.</span>
+
+/home/u1983390/apps/blobtools/blobtools plot -i <span class="hljs-variable">${prefix}</span>.blobtools.blobDB.json -r species --format pdf
+
+/home/u1983390/apps/blobtools/blobtools plot -i <span class="hljs-variable">${prefix}</span>.blobtools.blobDB.json -r phylum --format pdf
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+<span class="hljs-comment">#Send email notifciation of job completion.</span>
+
+SendEmail.py <span class="hljs-string">&quot;Blobtools Complete&quot;</span> <span class="hljs-string">&quot;Blobtools analysis now complete. Check for results.&quot;</span>
+
+<span class="hljs-built_in">echo</span> $(<span class="hljs-built_in">date</span>)
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+</code></pre>
+<p><img src="file:////Volumes/Jamie_EXT/Research/Genomics/NewToolsProject/FocGenomes/Indian_Genomes/Docs/S16_BlobPlot.png" alt="Alt text"></p>
+<p><img src="file:////Volumes/Jamie_EXT/Research/Genomics/NewToolsProject/FocGenomes/Indian_Genomes/Docs/S16_BlobMappedReads.png" alt="Alt text"></p>
+<p>As all the contigs are from <em>Fusarium</em> using BlobTools, I am wondering if the &gt;25% GC removed contigs are from any contaminants or other phylum_._ I therefore ran BlobTools on the Untrimmed SPAdes assembly.</p>
+<p>The output for the second BlobTools search using all contigs matches the first BlobTools. Most of the sequences are from <em>F. fujikuroi.</em> Interestingly, only 0.55% of the reads are from <em>F. saccahri.</em> I will conduct a <em>TEF-1a</em> and <em>RPBII</em> phylogeny and Fusariod DB search to try and work out what species this may be. I think the high <em>F. fujikuroi</em> hits is because of bias in the BLAST nt DB om Vettel.</p>
+<h3 id="for-the-s32-and-s6-assemblies">For the S32 and S6 assemblies</h3>
+<p>I am going to try to create a <em>de novo</em> assembly for S32 using the same SPAdes command and approach to see what the BlobTools results are. If I get a lot of hits for the higher GC contigs looking like the bacterial species, I can try to filter those out using the <code>gcTrimmer.py</code> script.</p>
+<p>The BlobTools results indicate a fair amount of contamination, but the majority of assembled hits are for <em>F. fujikori –</em> as 20% of the reads mapped to FS66, I am going to extract these into a fastq and create a <em>de novo</em> SPAdes assembly from that. I'll then search and extract the <em>TEF1-a</em> and <em>RBPII</em> regions to see if it looks like <em>F. saccahri.</em></p>
+<p><img src="file:////Volumes/Jamie_EXT/Research/Genomics/NewToolsProject/FocGenomes/Indian_Genomes/Docs/S32_BlobPlot.png" alt="Alt text"></p>
+<p><img src="file:////Volumes/Jamie_EXT/Research/Genomics/NewToolsProject/FocGenomes/Indian_Genomes/Docs/S32_BlobMappedReads.png" alt="Alt text"></p>
+<p>This whole process (<em>de novo</em> assembly from all reads, blobtools, <em>de novo</em> assembly from <em>F. saccahari</em> mapped reads) will also be performed for S6.</p>
+
+        <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+        
+    </body>
+    </html>

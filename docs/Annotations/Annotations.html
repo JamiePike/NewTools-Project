@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Annotations</title>
+        <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+        
+    </head>
+    <body class="vscode-body vscode-light">
+        <h1 id="annotations">Annotations</h1>
+<p>For annotations, the MAKER pipeline (version 3.01.04) was used. The Repeat Masking step was skipped, as we have already modeled and masked repeats in these assemblies.</p>
+<p>We do not have transcriptome data for these isolates and, as we are not clear on their species, have used a <em>Fusarium</em> wide reference proteome for annotation.</p>
+<h2 id="toc">TOC</h2>
+<ul>
+<li><a href="#directory-structure--set-up">DirStructure</a>
+<ul>
+<li><a href="#set-up-a-symbolic-link-symlink">Symlinks</a></li>
+</ul>
+</li>
+<li><a href="#maker">Maker</a>
+<ul>
+<li><a href="#maker-inputs">Maker Inputs</a></li>
+<li><a href="#running-maker">Running Maker</a></li>
+<li><a href="#processing-outputs">Processing Outputs</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="directory-structure--set-up">Directory Structure &amp; Set up</h2>
+<p>First, I generated directories for each isolate in the <code>GenomeAnnotations</code> directory.</p>
+<p>As no RNA sequencing data were available for these isolates, a reference proteome set was generated using the NCBI <code>RefSeq nr</code> database, using the search term <code>Fusarium AND srcdb_refseq[PROP]</code> with the protein option selected. The output was saved as <code>Fusarium_RefSeq-nr-fullProtdb.fasta</code> in the <code>AnnotationsRef</code> directory.</p>
+<h3 id="set-up-a-symbolic-link-symlink">Set up a symbolic link (symlink)</h3>
+<p>I then created a <a href="https://www.futurelearn.com/info/courses/linux-for-bioinformatics/0/steps/201767">symlink</a> to the TNAU masked FASTA files, to save disk space.</p>
+<pre><code class="language-bash"><span class="hljs-built_in">ln</span> -s ../../GenomeAssemblies/S32/FASTA_versions/S32_V5-FS66-Contiglabelled.FullMask.fasta ./
+</code></pre>
+<h2 id="maker">MAKER</h2>
+<p>I followed <a href="https://weatherby.genetics.utah.edu/MAKER/wiki/index.php/MAKER_Tutorial_for_GMOD_Online_Training_2014">this tutorial</a> for the majority of the process.</p>
+<h3 id="maker-inputs">Maker inputs</h3>
+<p>Maker requires at least three input <code>.ctl</code> files. These files were generated using the <code>maker -CTL</code> command.</p>
+<p>I edited the <code>maker_opts.ctl</code> file as required. The default output for the other files was left as is. Below I show the lines in the <code>maker_opts.ctl</code> file for the S16 assembly I edited.</p>
+<pre><code class="language-bash"><span class="hljs-comment">#-----Genome (these are always required)</span>
+genome=/home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/GenomeAnnotations/S16/S16_V4-Contiglabelled.FullMask.fasta <span class="hljs-comment">#genome sequence (fasta file or fasta embeded in GFF3 file)</span>
+
+<span class="hljs-comment">#-----Protein Homology Evidence (for best results provide a file for at least one)</span>
+protein=/home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/GenomeAnnotations/AnnotationsRef/Fusarium_RefSeq-nr-fullProtdb.fasta  <span class="hljs-comment">#protein sequence file in fasta format (i.e. from mutiple organisms)</span>
+
+<span class="hljs-comment">#-----Gene Prediction</span>
+augustus_species=fusarium <span class="hljs-comment">#Augustus gene prediction species model</span>
+protein2genome=1 <span class="hljs-comment">#infer predictions from protein homology, 1 = yes, 0 = no</span>
+</code></pre>
+<h3 id="running-maker">Running Maker</h3>
+<p>Once the <code>.ctl</code> files had been edited, I ran maker using the <code>MakerCommand.sh</code>. The original script is saved in the <code>bin</code> directory, but the file was symlinked in each isolate directory. The <code>MakerCommand.sh</code> script contains the following;</p>
+<pre><code class="language-bash"> <span class="hljs-comment">#!/bin/bash </span>
+
+<span class="hljs-comment">#Maker Command | Jamie Pike</span>
+
+<span class="hljs-comment">#Run like this: nohup MakerCommand.sh 1&gt;MakerRun_X.log &amp;</span>
+
+<span class="hljs-built_in">export</span> LIBDIR=/home/u1983390/apps/RepeatMaskerSetup/RepeatMasker/Libraries/ 
+<span class="hljs-built_in">export</span> REPEATMASKER_LIB_DIR=/home/u1983390/apps/RepeatMaskerSetup/RepeatMasker/Libraries/
+<span class="hljs-built_in">export</span> REPEATMASKER_MATRICES_DIR=/home/u1983390/apps/RepeatMaskerSetup/RepeatMasker/Libraries/Matrices
+
+<span class="hljs-built_in">set</span> -e <span class="hljs-comment">#Set escape in case the maker fails.</span>
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Maker Run&quot;</span> $(<span class="hljs-built_in">date</span>)
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+/home/u1983390/apps/maker/bin/maker -RM_off maker_bopts.ctl maker_exe.ctl maker_opts.ctl 
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+
+SendEmail.py <span class="hljs-string">&quot;Maker Annotation Complete&quot;</span> <span class="hljs-string">&quot;Hi Jamie, the Maker annotation is now complete. :)&quot;</span>
+</code></pre>
+<hr>
+<p>For the S16 isolate, I ran <code>MakerCommand.sh</code> as follows:</p>
+<pre><code class="language-bash">
+<span class="hljs-comment">#Ensure that i am using the AnnotationsEnv</span>
+<span class="hljs-built_in">nohup</span> MakerCommand.sh 1&gt;S16_Maker_01_141123.<span class="hljs-built_in">log</span> &amp;
+</code></pre>
+<p>There were some issues with the <code>augustus</code> executable stored on Vettel, I therefore also had to edit the <code>Maker_exe.ctl</code>, pointing to anther version of <code>augustus</code>.</p>
+<pre><code class="language-bash">augustus=/home/u1983390/miniconda3/envs/MaeiEnv/bin/augustus <span class="hljs-comment">#location of augustus executable</span>
+</code></pre>
+<h4 id="time-logs">Time logs</h4>
+<p>S16:</p>
+<p>I set the maker annotation for S16 running at 17:06 on the 14th of November 2023.</p>
+<p>When I checked at 08:55 on 20th November, MAKER had finished. I had checked on 15th, 16th, and 17th and MAKER was still running.</p>
+<hr>
+<p>S32:</p>
+<pre><code class="language-bash"><span class="hljs-built_in">nohup</span> MakerCommand.sh 1&gt;S32_Maker_01_211123.<span class="hljs-built_in">log</span> &amp;
+</code></pre>
+<p>Here: <code>/home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/GenomeAnnotations/S32</code></p>
+<p>Start: 16:54, 21/11/2023
+Finish: 22:21, 24/11/2023</p>
+<hr>
+<p>S6:</p>
+<pre><code class="language-bash"><span class="hljs-built_in">nohup</span> MakerCommand.sh 1&gt;S6_Maker_01_271123.<span class="hljs-built_in">log</span> &amp;
+</code></pre>
+<p>Start: 10:37, 27/11/2023
+Finish: 09:42, 01/12/2023</p>
+<h3 id="processing-outputs">Processing Outputs</h3>
+<p>Summary of outputs:</p>
+<ul>
+<li>S6: all contigs were successfully annotated.</li>
+<li>S16: all contigs were successfully annotated.</li>
+<li>S32: all contigs were successfully annotated.</li>
+<li>SY-2:</li>
+<li>S32_2:</li>
+<li>S56:</li>
+</ul>
+<p>I therefore merged the output FASTA and GFF files, using the maker inbuilt <code>fasta_merge</code> and <code>gff_merge</code>.</p>
+<pre><code class="language-bash"><span class="hljs-comment"># example for S16</span>
+
+fasta_merge -d S16_V4-Contiglabelled.FullMask_master_datastore_index.<span class="hljs-built_in">log</span> <span class="hljs-comment"># -g ensure we take only the Maker outputs, and not BLAST alignments etc.</span>
+
+gff3_merge -g -d S16_V4-Contiglabelled.FullMask_master_datastore_index.<span class="hljs-built_in">log</span>
+</code></pre>
+<p>I then tried to gauge the quality of the annotations using the following steps.</p>
+<p>First, I checked the number of gene models for, and compared it to similarly sized Fusarium assemblies.</p>
+<pre><code class="language-bash"><span class="hljs-comment">#check the number of predicted genes</span>
+awk <span class="hljs-string">&#x27;{ if ($3 == &quot;gene&quot;) print $0 }&#x27;</span> S16_V4-Contiglabelled.FullMask.all.gff | awk <span class="hljs-string">&#x27;{ sum += ($5 - $4) } END { print NR, sum / NR }&#x27;</span>
+</code></pre>
+<p>Results</p>
+<ul>
+<li>S6: 17891 1418.74</li>
+<li>S16: 15727 1521.13</li>
+<li>S32: 15824 1491.34</li>
+<li>S32_2</li>
+<li>SY-2</li>
+<li>S56</li>
+</ul>
+<p>I then checked the AED score output using the <code>AED_cdf_generator.pl</code> script supplied with MAKER, and used <a href="/Volumes/Jamie_EXT/Projects/NewToolsProject/exp/GenomeAnnotations/bin/SadikShared">Sadik's script</a> to generate a figure.</p>
+<pre><code class="language-bash"><span class="hljs-comment"># use AED generator.</span>
+perl AED_cdf_generator.pl -b 0.010 S16_V4-Contiglabelled.FullMask.all.gff &gt; S16_V4-Contiglabelled.FullMask.AED-0.010.txt
+</code></pre>
+<p>I also ran BUSCO on the <code>S16_V4-Contiglabelled.FullMask.all.maker.transcripts.fasta</code>, using the following command:</p>
+<pre><code class="language-bash"><span class="hljs-comment"># BUSCO command for transcripts fasta</span>
+
+<span class="hljs-built_in">nohup</span> busco -i  S16_V4-Contiglabelled.FullMask.all.maker.transcripts.fasta -o busco_Hypocreales -l hypocreales -m transcriptome -c 1 -f 1&gt;BuscoOfTranscripts.<span class="hljs-built_in">log</span> &amp;
+</code></pre>
+<h3 id="busco-results-for-isolate-predicted-transcripts">BUSCO results for isolate predicted transcripts.</h3>
+<pre><code class="language-bash"><span class="hljs-comment">#  S16 transcripts:</span>
+ --------------------------------------------------
+ |Results from dataset hypocreales_odb10           |
+ --------------------------------------------------
+ |C:98.7%[S:98.5%,D:0.2%],F:0.6%,M:0.7%,n:4494     |
+ |4434 Complete BUSCOs (C)                       |
+ |4426 Complete and single-copy BUSCOs (S)       |
+ |8 Complete and duplicated BUSCOs (D)        |
+ |26 Fragmented BUSCOs (F)                     |
+ |34 Missing BUSCOs (M)                        |
+ |4494 Total BUSCO <span class="hljs-built_in">groups</span> searched               |
+ --------------------------------------------------
+
+<span class="hljs-comment"># S32 transcripts:</span>
+
+ --------------------------------------------------
+ |Results from dataset hypocreales_odb10           |
+ --------------------------------------------------
+ |C:98.7%[S:98.5%,D:0.2%],F:0.5%,M:0.8%,n:4494     |
+ |4437 Complete BUSCOs (C)                       |
+ |4427 Complete and single-copy BUSCOs (S)       |
+ |10 Complete and duplicated BUSCOs (D)        |
+ |23 Fragmented BUSCOs (F)                     |
+ |34 Missing BUSCOs (M)                        |
+ |4494 Total BUSCO <span class="hljs-built_in">groups</span> searched               |
+ --------------------------------------------------
+
+<span class="hljs-comment"># S6 transcripts:</span>
+
+ --------------------------------------------------
+ |Results from dataset hypocreales_odb10           |
+ --------------------------------------------------
+ |C:99.1%[S:98.6%,D:0.5%],F:0.3%,M:0.6%,n:4494     |
+ |4454 Complete BUSCOs (C)                       |
+ |4432 Complete and single-copy BUSCOs (S)       |
+ |22 Complete and duplicated BUSCOs (D)        |
+ |13 Fragmented BUSCOs (F)                     |
+ |27 Missing BUSCOs (M)                        |
+ |4494 Total BUSCO <span class="hljs-built_in">groups</span> searched               |
+ --------------------------------------------------
+
+</code></pre>
+<p>I also visualised each MAKER2 gff3 on the genome using the genome browser IGV, to ensure the output's look sensible.</p>
+
+        <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+        
+    </body>
+    </html>

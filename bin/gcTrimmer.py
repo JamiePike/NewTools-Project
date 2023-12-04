@@ -1,0 +1,1 @@
+/Users/u1983390/GitHub/UsefulScripts/FastaProcessing/gcTrimmer.py
