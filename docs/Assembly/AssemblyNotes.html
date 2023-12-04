@@ -1003,7 +1003,7 @@ python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
 <h1 id="de-novo-assemblies"><em>De novo</em> assemblies</h1>
 <h3 id="isolate-s16">Isolate S16</h3>
 <p>SPAdes was used to generate the S16 <em>de novo</em> assembly, as it was for the SY-2 assembly prepared in 2022. The SPAdes assembly was generated in the following directory:</p>
-<p><code>/home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S16 </code></p>
+<p><code>/home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S16</code></p>
 <p>Using the following command:</p>
 <pre><code class="language-bash"><span class="hljs-built_in">nohup</span> ./SPAdesAssembly-S16.sh 1&gt;S16_SpadesAssembly.<span class="hljs-built_in">log</span> &amp;
 </code></pre>
@@ -1164,13 +1164,146 @@ python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
 <p><img src="file:////Volumes/Jamie_EXT/Projects/NewToolsProject/docs/Assembly/S16_BlobPlot.png" alt="Alt text"></p>
 <p><img src="file:////Volumes/Jamie_EXT/Projects/NewToolsProject/docs/Assembly/S16_BlobMappedReads.png" alt="Alt text"></p>
 <p>As all the contigs are from <em>Fusarium</em> using BlobTools, I am wondering if the &gt;25% GC removed contigs are from any contaminants or other phylum_._ I therefore ran BlobTools on the Untrimmed SPAdes assembly.</p>
-<p>The output for the second BlobTools search using all contigs matches the first BlobTools. Most of the sequences are from <em>F. fujikuroi.</em> Interestingly, only 0.55% of the reads are from <em>F. saccahri.</em> I will conduct a <em>TEF-1a</em> and <em>RPBII</em> phylogeny and Fusariod DB search to try and work out what species this may be. I think the high <em>F. fujikuroi</em> hits is because of bias in the BLAST nt DB om Vettel.</p>
+<p>The output for the second BlobTools search using all contigs matches the first BlobTools. Most of the sequences are from <em>F. fujikuroi.</em> Interestingly, only 0.55% of the reads are from <em>F. saccahri.</em> I will conduct a <em>TEF-1a</em> and <em>RPBII</em> phylogeny and Fusariod DB search to try and work out what species this may be. I think the high <em>F. fujikuroi</em> hits is because of bias in the BLAST nt DB on Vettel.</p>
 <h3 id="for-the-s32-and-s6-assemblies">For the S32 and S6 assemblies</h3>
 <p>I am going to try to create a <em>de novo</em> assembly for S32 using the same SPAdes command and approach to see what the BlobTools results are. If I get a lot of hits for the higher GC contigs looking like the bacterial species, I can try to filter those out using the <code>gcTrimmer.py</code> script.</p>
 <p>The BlobTools results indicate a fair amount of contamination, but the majority of assembled hits are for <em>F. fujikori –</em> as 20% of the reads mapped to FS66, I am going to extract these into a fastq and create a <em>de novo</em> SPAdes assembly from that. I'll then search and extract the <em>TEF1-a</em> and <em>RBPII</em> regions to see if it looks like <em>F. saccahri.</em></p>
 <p><img src="file:////Volumes/Jamie_EXT/Projects/NewToolsProject/docs/Assembly/S32_BlobPlot.png" alt="Alt text"></p>
 <p><img src="file:////Volumes/Jamie_EXT/Projects/NewToolsProject/docs/Assembly/S32_BlobMappedReads.png" alt="Alt text"></p>
 <p>This whole process (<em>de novo</em> assembly from all reads, blobtools, <em>de novo</em> assembly from <em>F. saccahari</em> mapped reads) will also be performed for S6.</p>
+<hr>
+<h2 id="generating-the-s32-and-s6-assemblies-from-mapped-reads">Generating the S32 and S6 assemblies from mapped reads</h2>
+<p>First i created the FASTQ files using the script <code>FastqFromMapped.sh</code> and commands below:</p>
+<pre><code class="language-bash">
+<span class="hljs-comment"># S32</span>
+
+<span class="hljs-built_in">nohup</span> FastqFromMapped.sh NewToolsProject/exp/GenomeAssemblies/S32/Mapping/Mapping_Assembly_S32-FS66MappedReads/S32RawReads_mappedto_S32SPAdesAssembly_FS66Reads.sorted.bam S32-FS66_ 1&gt;FastqFromMapped_S32-FS66.<span class="hljs-built_in">log</span> &amp;
+
+<span class="hljs-comment"># S6</span>
+
+</code></pre>
+<p>Then, I generated the assemblies using the <code>SPAdesAssembly.sh</code> shell script.</p>
+<pre><code class="language-bash"><span class="hljs-comment">#  S32 </span>
+<span class="hljs-comment"># I ran in the following directory NewToolsProject/exp/GenomeAssemblies/S32/SPAdesAssemblies/SPAdesAssembly_FS66Reads</span>
+
+<span class="hljs-built_in">nohup</span> SPAdesAssembly.sh  /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S32/S32-FS66_Fastqs/S32-FS66_Mapped.1.fastq /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S32/S32-FS66_Fastqs/S32-FS66_Mapped.2.fastq  S32-FS66Reads 1&gt;../SPAdesAssembly_FS66Reads.<span class="hljs-built_in">log</span> &amp;
+
+<span class="hljs-comment"># S6</span>
+
+</code></pre>
+<p>I renamed the fasta and copied it to the FASTA_Version directory.</p>
+<pre><code class="language-bash">
+<span class="hljs-built_in">mv</span> contigs.fasta SPAdesAssembly_FS66Reads.fasta        
+
+<span class="hljs-built_in">mkdir</span> -p ../../FASTA_versions 
+
+<span class="hljs-built_in">cp</span> SPAdesAssembly_FS66Reads.fasta    ../../FASTA_versions/S32_V3-SPAdesAssembly_FS66Reads.fasta 
+
+<span class="hljs-comment"># I also copied the previous two assemblies to the FASTA_versions directory at this point and renamed the files. I repeated this for all of the assemblies so i could keep track of the versions going forward.</span>
+</code></pre>
+<p>I then repeated the BlobTools analysis. I had updated the <a href="http://Bowtie2Command.sh">Bowtie2Command.sh</a> script at this point:</p>
+<pre><code class="language-bash"><span class="hljs-meta">#!/bin/bash</span>
+
+<span class="hljs-comment">#Script to map fastq files to a reference. </span>
+<span class="hljs-comment">#Builds the index, performs mapping and notifies when complete. </span>
+<span class="hljs-comment">#Miniconda AssemblyEnv should be activated. </span>
+
+<span class="hljs-comment">#To exit if any of the pipeline fails. </span>
+<span class="hljs-built_in">set</span> -e
+
+<span class="hljs-comment">#Set the variables</span>
+Ref=<span class="hljs-variable">${1? Please eneter a reference Assembly.}</span> <span class="hljs-comment">#Reference Assembley for mapping</span>
+One=<span class="hljs-variable">${2?Please provide the fastq 1.}</span> <span class="hljs-comment">#Where One is the first fastq.</span>
+Two=<span class="hljs-variable">${3?Please provide the fastq 2.}</span> <span class="hljs-comment">#Where two is the second fastq.</span>
+Prefix=<span class="hljs-variable">${4?Please provide an output prefix}</span> <span class="hljs-comment">#Prefix for outputs</span>
+
+
+<span class="hljs-keyword">if</span> [ <span class="hljs-string">&quot;<span class="hljs-variable">$CONDA_DEFAULT_ENV</span>&quot;</span> = <span class="hljs-string">&quot;AssemblyEnv&quot;</span> ]; <span class="hljs-keyword">then</span> <span class="hljs-comment">#Check the conda environment is correct.</span>
+    python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 78)&quot;</span>
+    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Bowtie2 Mapping&quot;</span>
+    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;---------------&quot;</span>
+    <span class="hljs-built_in">echo</span> $(<span class="hljs-built_in">date</span>)
+    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Usage: Bowtie2Command.sh &lt;reference fasta&gt; &lt;fastq_1&gt; &lt;fastq_2&gt; &lt;output prefix&gt;&quot;</span>
+    python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 78)&quot;</span>
+    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Building Bowtie2 Index...&quot;</span>
+    <span class="hljs-comment">#Make Ouput Directory for index</span>
+    <span class="hljs-built_in">mkdir</span> <span class="hljs-variable">${Prefix}</span>_Bowtie2Index
+    <span class="hljs-comment">#Build the index </span>
+    bowtie2-build <span class="hljs-variable">${Ref}</span> <span class="hljs-variable">${Prefix}</span>_Bowtie2Index/<span class="hljs-variable">${Prefix}</span>.Index &gt;<span class="hljs-variable">${Prefix}</span>_Bowtie2-Build.<span class="hljs-built_in">log</span>
+
+    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Performing Bowtie2 Alignment...&quot;</span>
+    <span class="hljs-comment">#Perform Bowtie2 Mapping using S. maltophilia as the reference.</span>
+    bowtie2 --<span class="hljs-built_in">local</span> -x ./<span class="hljs-variable">${Prefix}</span>_Bowtie2Index/<span class="hljs-variable">${Prefix}</span>.Index  -1 <span class="hljs-variable">$One</span> -2 <span class="hljs-variable">$Two</span> | samtools view -Shu | samtools <span class="hljs-built_in">sort</span> -o <span class="hljs-variable">${Prefix}</span>.sorted.bam 
+
+    python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 78)&quot;</span>
+    <span class="hljs-comment">#Send email notifciation of job completion.</span>
+    SendEmail.py <span class="hljs-string">&quot;Bowtie2 Complete&quot;</span> <span class="hljs-string">&quot;Bowtie2 Mapping complete for <span class="hljs-variable">${Prefix}</span>. Check for results.&quot;</span>
+    python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 78)&quot;</span>      
+<span class="hljs-keyword">else</span>
+    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;You have not activated the conda environment.&quot;</span>
+    <span class="hljs-built_in">exit</span> 1
+<span class="hljs-keyword">fi</span>
+
+</code></pre>
+<pre><code class="language-bash"><span class="hljs-built_in">nohup</span> Bowtie2Command.sh home/u1983390/NewToolsProject/exp/GenomeAssemblies/S32/FASTA_/versions/S32_V3-SPAdesAssembly_FS66Reads.fasta home/u1983390/Projects/NewToolsProject/exp/GenomeAssemblies/rawdata/S32/S32_1.fq.gz home/u1983390/Projects/NewToolsProject/exp/GenomeAssemblies/rawdata/S32/S32_2.fq.gz S32RawReads_mappedto_S32SPAdesAssembly_FS66Reads 1&gt;Mapping_Assembly_S32-FS66MappedReads.<span class="hljs-built_in">log</span> &amp;
+</code></pre>
+<p>I then performed the BlobTools anaylsis with <code>BlobtoolsCommand.sh</code>.</p>
+<pre><code class="language-bash"><span class="hljs-built_in">nohup</span> BlobtoolsCommand.sh /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S32/SPAdesAssembly_FS66Reads.fasta /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S32/Mapping/S32RawReads_mappedto_S32SPAdesAssembly_FS66Reads.bam TNAU_S32-FS66ReadsAssembly 1&gt;Blobtools.<span class="hljs-built_in">log</span> &amp;
+</code></pre>
+<p>Once the BlobTools analysis was finsihed, I removed contigs identified as belonging to other, recognised genera using the <code>ContaminantFilter.sh</code> script.</p>
+<pre><code class="language-bash"><span class="hljs-meta">#!/bin/bash</span>
+
+<span class="hljs-comment">#Jamie Pike</span>
+<span class="hljs-comment">#Command for filtering conatminant blobtools hits. This groups all of the standard BlobTools commands I used to remove a contaminat contigs analysis. </span>
+
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Blobtools Contaminant Filter&quot;</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;----------------------------&quot;</span>
+<span class="hljs-built_in">echo</span> $(<span class="hljs-built_in">date</span>)
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Usage: ContaminantFilter.sh &lt;FASTA file&gt; &lt;blobtools json file&gt; &lt;outfile prefix&gt;&quot;</span>
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span>
+
+infile=<span class="hljs-variable">${1?Please provide the assembly input fasta.}</span> <span class="hljs-comment">#Input Assembly.</span>
+json=<span class="hljs-variable">${2?Please provide a BlobTools json file.}</span> <span class="hljs-comment">#Input BAM.</span>
+prefix=<span class="hljs-variable">${3?Please provide a prefix for you outputs.}</span> 
+
+<span class="hljs-comment">########################</span>
+<span class="hljs-comment">#Escape the script if there are any errors. </span>
+<span class="hljs-built_in">set</span> -e 
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Creating species table...&quot;</span>
+<span class="hljs-comment">#Use BlobTools view to generate a blobtools table.txt file for filtering.</span>
+blobtools view -i <span class="hljs-variable">${json}</span> -r species -o <span class="hljs-variable">${prefix}</span>
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Filetering for Fusarium and no-hit only contigs...&quot;</span>
+<span class="hljs-comment">#Use grep to extact only the Fusarium and no-hit lines from the hit table.</span>
+grep -E <span class="hljs-string">&#x27;Fusarium|no-hit&#x27;</span> <span class="hljs-variable">${prefix}</span>*.table.txt &gt; <span class="hljs-variable">${prefix}</span>.FusariumHits.table.txt
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Generating list file...&quot;</span>
+<span class="hljs-comment">#Create a list of the Fusarium and no-hit only contigs. </span>
+awk <span class="hljs-string">&#x27;{print $1}&#x27;</span> <span class="hljs-variable">${prefix}</span>.FusariumHits.table.txt &gt;  <span class="hljs-variable">${prefix}</span>.FusariumHits.list.txt
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Generating contaminant filtered fasta...&quot;</span>
+<span class="hljs-comment">#Create a list of the Fusarium and no-hit only contigs. </span>
+blobtools seqfilter -i <span class="hljs-variable">${infile}</span> -l <span class="hljs-variable">${prefix}</span>.FusariumHits.list.txt -o <span class="hljs-variable">${prefix}</span>.ContaminantFiltered
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Generating contaminant sequences fasta...&quot;</span>
+<span class="hljs-comment">#Create a list of the Fusarium and no-hit only contigs. </span>
+blobtools seqfilter -v -i <span class="hljs-variable">${infile}</span> -l <span class="hljs-variable">${prefix}</span>.FusariumHits.list.txt -o <span class="hljs-variable">${prefix}</span>.ContaminantSequences
+
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;ContaminantFilter.sh finished.&quot;</span>
+<span class="hljs-built_in">echo</span> $(<span class="hljs-built_in">date</span>)
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;+++++
+It is advisable that you check the number of contigs in the <span class="hljs-variable">${prefix}</span>.ContaminantFiltered.fasta matches the number of lines in the <span class="hljs-variable">${prefix}</span>.FusariumHits.table.txt file.&quot;</span>
+python -c <span class="hljs-string">&quot;print(&#x27;=&#x27; * 75)&quot;</span> 
+</code></pre>
+<p>I ran the <code>ContaminantFilter.sh</code> script with the following inputs on the command-line:</p>
+<pre><code class="language-bash"><span class="hljs-built_in">nohup</span> ContaminantFilter.sh /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S32/SPAdesAssembly_FS66Reads.fasta TNAU_S32-FS66ReadsAssembly.blobtools.blobDB.json ContamFilter 
+</code></pre>
+<p>The filtered output FASTA was then copied to the FASTA Versions directory and used for subsequent analysis.</p>
+<pre><code class="language-bash">
+<span class="hljs-built_in">cp</span> S32_FS66-ContaminantFiltered.fasta ../../FASTA_versions/S32_V4-_FS66-ContaminantFiltered.fasta
+</code></pre>
 
         <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
         

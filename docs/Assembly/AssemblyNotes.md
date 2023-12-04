@@ -624,8 +624,7 @@ The S16 reads which did not map to _FS66_ were extracted and searched against th
 
 SPAdes was used to generate the S16 _de novo_ assembly, as it was for the SY-2 assembly prepared in 2022. The SPAdes assembly was generated in the following directory:
 
-``/home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S16
-``
+``/home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S16``
 
 Using the following command:
 
@@ -837,7 +836,7 @@ python -c "print('=' * 75)"
 
 As all the contigs are from _Fusarium_ using BlobTools, I am wondering if the >25% GC removed contigs are from any contaminants or other phylum_._ I therefore ran BlobTools on the Untrimmed SPAdes assembly.
 
- The output for the second BlobTools search using all contigs matches the first BlobTools. Most of the sequences are from _F. fujikuroi._ Interestingly, only 0.55% of the reads are from _F. saccahri._ I will conduct a _TEF-1a_ and _RPBII_ phylogeny and Fusariod DB search to try and work out what species this may be. I think the high _F. fujikuroi_ hits is because of bias in the BLAST nt DB om Vettel.
+ The output for the second BlobTools search using all contigs matches the first BlobTools. Most of the sequences are from _F. fujikuroi._ Interestingly, only 0.55% of the reads are from _F. saccahri._ I will conduct a _TEF-1a_ and _RPBII_ phylogeny and Fusariod DB search to try and work out what species this may be. I think the high _F. fujikuroi_ hits is because of bias in the BLAST nt DB on Vettel.
 
 ### For the S32 and S6 assemblies
 
@@ -850,3 +849,164 @@ The BlobTools results indicate a fair amount of contamination, but the majority 
 ![Alt text](S32_BlobMappedReads.png)
 
 This whole process (_de novo_ assembly from all reads, blobtools, _de novo_ assembly from _F. saccahari_ mapped reads) will also be performed for S6.
+
+---
+
+## Generating the S32 and S6 assemblies from mapped reads
+
+First i created the FASTQ files using the script `FastqFromMapped.sh` and commands below:
+
+```bash
+
+# S32
+
+nohup FastqFromMapped.sh NewToolsProject/exp/GenomeAssemblies/S32/Mapping/Mapping_Assembly_S32-FS66MappedReads/S32RawReads_mappedto_S32SPAdesAssembly_FS66Reads.sorted.bam S32-FS66_ 1>FastqFromMapped_S32-FS66.log &
+
+# S6
+
+```
+
+Then, I generated the assemblies using the ``SPAdesAssembly.sh`` shell script.
+
+```bash
+#  S32 
+# I ran in the following directory NewToolsProject/exp/GenomeAssemblies/S32/SPAdesAssemblies/SPAdesAssembly_FS66Reads
+
+nohup SPAdesAssembly.sh  /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S32/S32-FS66_Fastqs/S32-FS66_Mapped.1.fastq /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S32/S32-FS66_Fastqs/S32-FS66_Mapped.2.fastq  S32-FS66Reads 1>../SPAdesAssembly_FS66Reads.log &
+
+# S6
+
+```
+
+I renamed the fasta and copied it to the FASTA_Version directory.
+
+```bash
+
+mv contigs.fasta SPAdesAssembly_FS66Reads.fasta        
+
+mkdir -p ../../FASTA_versions 
+
+cp SPAdesAssembly_FS66Reads.fasta    ../../FASTA_versions/S32_V3-SPAdesAssembly_FS66Reads.fasta 
+
+# I also copied the previous two assemblies to the FASTA_versions directory at this point and renamed the files. I repeated this for all of the assemblies so i could keep track of the versions going forward.
+```
+
+I then repeated the BlobTools analysis. I had updated the Bowtie2Command.sh script at this point:
+
+```bash
+#!/bin/bash
+
+#Script to map fastq files to a reference. 
+#Builds the index, performs mapping and notifies when complete. 
+#Miniconda AssemblyEnv should be activated. 
+
+#To exit if any of the pipeline fails. 
+set -e
+
+#Set the variables
+Ref=${1? Please eneter a reference Assembly.} #Reference Assembley for mapping
+One=${2?Please provide the fastq 1.} #Where One is the first fastq.
+Two=${3?Please provide the fastq 2.} #Where two is the second fastq.
+Prefix=${4?Please provide an output prefix} #Prefix for outputs
+
+
+if [ "$CONDA_DEFAULT_ENV" = "AssemblyEnv" ]; then #Check the conda environment is correct.
+    python -c "print('=' * 78)"
+    echo "Bowtie2 Mapping"
+    echo "---------------"
+    echo $(date)
+    echo "Usage: Bowtie2Command.sh <reference fasta> <fastq_1> <fastq_2> <output prefix>"
+    python -c "print('=' * 78)"
+    echo "Building Bowtie2 Index..."
+    #Make Ouput Directory for index
+    mkdir ${Prefix}_Bowtie2Index
+    #Build the index 
+    bowtie2-build ${Ref} ${Prefix}_Bowtie2Index/${Prefix}.Index >${Prefix}_Bowtie2-Build.log
+
+    echo "Performing Bowtie2 Alignment..."
+    #Perform Bowtie2 Mapping using S. maltophilia as the reference.
+    bowtie2 --local -x ./${Prefix}_Bowtie2Index/${Prefix}.Index  -1 $One -2 $Two | samtools view -Shu | samtools sort -o ${Prefix}.sorted.bam 
+
+    python -c "print('=' * 78)"
+    #Send email notifciation of job completion.
+    SendEmail.py "Bowtie2 Complete" "Bowtie2 Mapping complete for ${Prefix}. Check for results."
+    python -c "print('=' * 78)"      
+else
+    echo "You have not activated the conda environment."
+    exit 1
+fi
+
+```
+
+```bash
+nohup Bowtie2Command.sh home/u1983390/NewToolsProject/exp/GenomeAssemblies/S32/FASTA_/versions/S32_V3-SPAdesAssembly_FS66Reads.fasta home/u1983390/Projects/NewToolsProject/exp/GenomeAssemblies/rawdata/S32/S32_1.fq.gz home/u1983390/Projects/NewToolsProject/exp/GenomeAssemblies/rawdata/S32/S32_2.fq.gz S32RawReads_mappedto_S32SPAdesAssembly_FS66Reads 1>Mapping_Assembly_S32-FS66MappedReads.log &
+```
+
+I then performed the BlobTools anaylsis with `BlobtoolsCommand.sh`.
+
+```bash
+nohup BlobtoolsCommand.sh /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S32/SPAdesAssembly_FS66Reads.fasta /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S32/Mapping/S32RawReads_mappedto_S32SPAdesAssembly_FS66Reads.bam TNAU_S32-FS66ReadsAssembly 1>Blobtools.log &
+```
+
+Once the BlobTools analysis was finsihed, I removed contigs identified as belonging to other, recognised genera using the `ContaminantFilter.sh` script.
+
+```bash
+#!/bin/bash
+
+#Jamie Pike
+#Command for filtering conatminant blobtools hits. This groups all of the standard BlobTools commands I used to remove a contaminat contigs analysis. 
+
+python -c "print('=' * 75)"
+echo "Blobtools Contaminant Filter"
+echo "----------------------------"
+echo $(date)
+echo "Usage: ContaminantFilter.sh <FASTA file> <blobtools json file> <outfile prefix>"
+python -c "print('=' * 75)"
+
+infile=${1?Please provide the assembly input fasta.} #Input Assembly.
+json=${2?Please provide a BlobTools json file.} #Input BAM.
+prefix=${3?Please provide a prefix for you outputs.} 
+
+########################
+#Escape the script if there are any errors. 
+set -e 
+
+echo "Creating species table..."
+#Use BlobTools view to generate a blobtools table.txt file for filtering.
+blobtools view -i ${json} -r species -o ${prefix}
+
+echo "Filetering for Fusarium and no-hit only contigs..."
+#Use grep to extact only the Fusarium and no-hit lines from the hit table.
+grep -E 'Fusarium|no-hit' ${prefix}*.table.txt > ${prefix}.FusariumHits.table.txt
+
+echo "Generating list file..."
+#Create a list of the Fusarium and no-hit only contigs. 
+awk '{print $1}' ${prefix}.FusariumHits.table.txt >  ${prefix}.FusariumHits.list.txt
+
+echo "Generating contaminant filtered fasta..."
+#Create a list of the Fusarium and no-hit only contigs. 
+blobtools seqfilter -i ${infile} -l ${prefix}.FusariumHits.list.txt -o ${prefix}.ContaminantFiltered
+
+echo "Generating contaminant sequences fasta..."
+#Create a list of the Fusarium and no-hit only contigs. 
+blobtools seqfilter -v -i ${infile} -l ${prefix}.FusariumHits.list.txt -o ${prefix}.ContaminantSequences
+
+echo "ContaminantFilter.sh finished."
+echo $(date)
+echo "+++++
+It is advisable that you check the number of contigs in the ${prefix}.ContaminantFiltered.fasta matches the number of lines in the ${prefix}.FusariumHits.table.txt file."
+python -c "print('=' * 75)" 
+```
+
+I ran the `ContaminantFilter.sh` script with the following inputs on the command-line:
+
+```bash
+nohup ContaminantFilter.sh /home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/S32/SPAdesAssembly_FS66Reads.fasta TNAU_S32-FS66ReadsAssembly.blobtools.blobDB.json ContamFilter 
+```
+
+The filtered output FASTA was then copied to the FASTA Versions directory and used for subsequent analysis.
+
+```bash
+
+cp S32_FS66-ContaminantFiltered.fasta ../../FASTA_versions/S32_V4-_FS66-ContaminantFiltered.fasta
+```
