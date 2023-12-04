@@ -10,5 +10,11 @@ Thumbs.db
 
 # VS code generated files #
 ###########################
-
 .vscode
+
+
+# Directories with data #
+#########################
+
+data/
+exp/
