@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Mummer alignments of Fusarium genomes for Circos plots</title>
+        <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+        
+    </head>
+    <body class="vscode-body vscode-light">
+        <h1 id="mummer-alignments-of-fusarium-genomes-for-circos-plots">Mummer alignments of Fusarium genomes for Circos plots</h1>
+<p>Date: 07/11/22</p>
+<p>Nucmer (version 4.0.0rc1) from Mummer was used to align the high quality <em>cubense</em>, <em>lycopersici</em> and <em>sacchari</em> genomes to help identify accessory and core regions, as well as systemic blocks.</p>
+<p>The following Fusarium Assemblies were used in the analysis:</p>
+<ul>
+<li>F._oxysporum_f._sp._cubense_160527.fna</li>
+<li>F._oxysporum_f._sp._cubense_UK0001.fna</li>
+<li>F._oxysporum_f._sp._lycopersici_4287.fna</li>
+<li>F._sacchari_FS66.fna</li>
+</ul>
+<p>Comparisons (Each pairwise alignment is stored in the corresponding directory):</p>
+<ul>
+<li>
+<p>Fol2478_VsFocuUK0001</p>
+</li>
+<li>
+<p>Fol2478_VsFocu160527</p>
+</li>
+<li>
+<p>FocuUK0001_Vs_Foc160527</p>
+</li>
+<li>
+<p>FocuUK0001_Vs_F.SacchariFS66</p>
+</li>
+<li>
+<p>Foc160527_Vs_F.SacchariFS66</p>
+</li>
+</ul>
+<h2 id="nucmer-analysis">Nucmer Analysis</h2>
+<p>The following commands were used for each alignment and filtering. Note this was all run locally using the AlignmentEnv conda environment.</p>
+<h3 id="fol2478_vsfocuuk0001">Fol2478_VsFocuUK0001</h3>
+<p>Mummer Commands:</p>
+<pre><code class="language-bash"><span class="hljs-comment"># Perform analysis</span>
+nucmer --maxmatch ../F._oxysporum_f._sp._lycopersici_4287.fna ../F._oxysporum_f._sp._cubense_UK0001.fna 
+
+<span class="hljs-built_in">mv</span> out.delta FoLy_and_FoCubUK0001.delta
+
+delta-filter -g FoLy_and_FoCubUK0001.delta &gt;FoLy_and_FoCubUK0001-deltafilter-g.delta
+
+<span class="hljs-comment"># plot</span>
+mummerplot FoLy_and_FoCubUK0001-deltafilter-g.delta -R ../F._oxysporum_f._sp._lycopersici_4287.fna -Q ../F._oxysporum_f._sp._cubense_UK0001.fna --filter --layout --png
+
+<span class="hljs-comment"># create circos plot data</span>
+show-coords -c -l -L 1000 -r -T FoLy_and_FoCubUK0001-deltafilter-g.delta &gt; FoLy_and_FoCubUK0001-deltafilter-g.coords.txt
+
+
+<span class="hljs-comment"># ceate Excel tsv:</span>
+<span class="hljs-built_in">cat</span> FoLy_and_FoCubUK0001-deltafilter-g.coords.txt &gt;&gt; Fol4278_UK0001_Links.txt
+open -a <span class="hljs-string">&quot;Microsoft Excel&quot;</span> Fol4278_UK0001_Links.txt
+<span class="hljs-comment">#The file is then formatted using Excel as a circos links file. </span>
+
+</code></pre>
+<h3 id="fol2478_vsfocu160527">Fol2478_VsFocu160527</h3>
+<p>Mummer Commands:</p>
+<pre><code class="language-bash"><span class="hljs-comment"># Perform analysis</span>
+nucmer --maxmatch F._oxysporum_f._sp._lycopersici_4287.fna F._oxysporum_f._sp._cubense_160527.fna
+
+<span class="hljs-built_in">mv</span> out.delta Fol2478_VsFocu160527.delta
+
+delta-filter -g  Fol2478_VsFocu160527.delta &gt; Fol2478_VsFocu160527.deltafilter-g.delta
+
+<span class="hljs-comment"># plot</span>
+mummerplot Fol2478_VsFocu160527.deltafilter-g.delta -R ./F._oxysporum_f._sp._lycopersici_4287.fna -Q F._oxysporum_f._sp._cubense_160527.fna --filter --layout --png
+
+<span class="hljs-comment"># create circos plot data</span>
+show-coords -c -l -L 1000 -r -T Fol2478_VsFocu160527.deltafilter-g.delta &gt; Fol2478_VsFocu160527.deltafilter-g.coords.txt
+
+<span class="hljs-comment"># Create Excel tsv:</span>
+<span class="hljs-built_in">cat</span> Fol2478_VsFocu160527.deltafilter-g.coords.txt &gt;&gt; Fol2478_VsFocu160527_Links.txt
+open -a <span class="hljs-string">&quot;Microsoft Excel&quot;</span> Fol2478_VsFocu160527_Links.txt
+<span class="hljs-comment"># The file is then formatted using Excel as a circos links file. </span>
+</code></pre>
+<h3 id="focuuk0001_vs_foc160527">FocuUK0001_Vs_Foc160527</h3>
+<p>Mummer Commands:</p>
+<pre><code class="language-bash"><span class="hljs-comment"># perform analysis</span>
+nucmer --maxmatch ./F._oxysporum_f._sp._cubense_UK0001.fna ./F._oxysporum_f._sp._cubense_160527.fna
+
+<span class="hljs-built_in">mv</span> out.delta FocuUK0001_Vs_Foc160527.delta
+
+delta-filter -g FocuUK0001_Vs_Foc160527.delta &gt; FocuUK0001_Vs_Foc160527.deltafilter-g.delta
+
+<span class="hljs-comment"># plot</span>
+mummerplot FocuUK0001_Vs_Foc160527.deltafilter-g.delta -R F._oxysporum_f._sp._cubense_UK0001.fna -Q F._oxysporum_f._sp._cubense_160527.fna --filter --layout --png
+
+<span class="hljs-comment"># create circos plot data</span>
+show-coords -c -l -L 1000 -r -T FocuUK0001_Vs_Foc160527.deltafilter-g.delta &gt; FocuUK0001_Vs_Foc160527.deltafilter-g.coords.txt
+
+<span class="hljs-comment"># Create Excel tsv:</span>
+<span class="hljs-built_in">cat</span> FocuUK0001_Vs_Foc160527.deltafilter-g.coords.txt &gt;&gt; FocuUK0001_Vs_Foc160527_Links.txt
+open -a <span class="hljs-string">&quot;Microsoft Excel&quot;</span> FocuUK0001_Vs_Foc160527_Links.txt
+<span class="hljs-comment"># The file is then formatted using Excel as a circos links file. </span>
+</code></pre>
+<h3 id="focuuk0001_vs_fsaccharifs66">FocuUK0001_Vs_F.SacchariFS66</h3>
+<p>Mummer Commands:</p>
+<pre><code class="language-bash"><span class="hljs-comment"># perform analysis</span>
+nucmer --maxmatch F._oxysporum_f._sp._cubense_UK0001.fna F._sacchari_FS66.fna 
+
+<span class="hljs-built_in">mv</span> out.delta FocuUK0001_Vs_F.SacchariFS66.delta
+
+delta-filter -g FocuUK0001_Vs_F.SacchariFS66.delta &gt; FocuUK0001_Vs_F.SacchariFS66.deltafilter-g.delta
+
+<span class="hljs-comment"># plot</span>
+mummerplot FocuUK0001_Vs_F.SacchariFS66.deltafilter-g.delta -R F._oxysporum_f._sp._cubense_UK0001.fna -Q F._sacchari_FS66.fna --filter --layout --png
+
+<span class="hljs-comment"># create circos plot data </span>
+show-coords -c -l -L 1000 -r -T FocuUK0001_Vs_F.SacchariFS66.deltafilter-g.delta &gt; FocuUK0001_Vs_F.SacchariFS66.deltafilter-g.coords.txt
+
+<span class="hljs-comment"># Create Excel tsv:</span>
+<span class="hljs-built_in">cat</span> FocuUK0001_Vs_F.SacchariFS66.deltafilter-g.coords.txt &gt;&gt; FocuUK0001_Vs_F.SacchariFS66_Links.txt
+open -a <span class="hljs-string">&quot;Microsoft Excel&quot;</span> FocuUK0001_Vs_F.SacchariFS66_Links.txt 
+<span class="hljs-comment">#The file is then formatted using Excel as a circos links file. </span>
+</code></pre>
+<h3 id="foc160527_vs_fsaccharifs66">Foc160527_Vs_F.SacchariFS66</h3>
+<p>Mummer Commands:</p>
+<pre><code class="language-bash"><span class="hljs-comment"># perfrom analysis</span>
+nucmer --maxmatch F._oxysporum_f._sp._cubense_160527.fna F._sacchari_FS66.fna
+
+<span class="hljs-built_in">mv</span> out.delta Foc160527_Vs_F.SacchariFS66.delta
+
+delta-filter -g Foc160527_Vs_F.SacchariFS66.delta &gt; Foc160527_Vs_F.SacchariFS66.deltafilter-g.delta
+
+<span class="hljs-comment"># plot</span>
+mummerplot Foc160527_Vs_F.SacchariFS66.deltafilter-g.delta -R F._oxysporum_f._sp._cubense_160527.fna -Q F._sacchari_FS66.fna --filter --layout --png
+
+<span class="hljs-comment"># create circos plot data</span>
+show-coords -c -l -L 1000 -r -T Foc160527_Vs_F.SacchariFS66.deltafilter-g.delta &gt; Foc160527_Vs_F.SacchariFS66.coords.txt
+
+<span class="hljs-comment"># Create Excel tsv:</span>
+<span class="hljs-built_in">cat</span> Foc160527_Vs_F.SacchariFS66.coords.txt &gt;&gt; Foc160527_Vs_F.SacchariFS66_Links.txt
+open -a <span class="hljs-string">&quot;Microsoft Excel&quot;</span> 
+</code></pre>
+<h2 id="circos-analysis">Circos Analysis</h2>
+<p>The delta filtered files were then used to build a corresponding links.txt file for circos.</p>
+<p>The circos karytopye file was built using the samtools faidx command to create a FASTA index, then formatting into the appropriate circos layout. The Circos karyotype files were then merged from each of the assemblies into a master karytoptye file.</p>
+
+        
+        
+    </body>
+    </html>
