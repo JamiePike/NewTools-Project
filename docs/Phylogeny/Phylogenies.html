@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Phylogeny of TNAU isolates</title>
+        <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+        
+    </head>
+    <body class="vscode-body vscode-light">
+        <h1 id="phylogeny-of-tnau-isolates">Phylogeny of TNAU isolates</h1>
+<p>TEF1-a and RBPii, common genetic barcodes in <em>Fusarium</em>, were used to generate phylogenies for the TNAU genomes.</p>
+<p>Databases for TEF1-a and RBPii were compiled from NCBI reference sequences as part of a Undergraduate project with Dr John Clarkson (<a href="../../data/phylogenies/Tef1a_db.fasta">see TEF1-a fasta</a>).</p>
+<p>The Fusarium assemblies were symlinked from the <a href="../../data/genomes/All_Fusarium_Genomes/">data directory</a></p>
+<h2 id="blastn-search">BLASTN Search</h2>
+<p>Using BLASTN (v2.9.0+; <code>1e-6</code> cut-off), homologs were identified in our Fusarium assembly database and the TNAU genomes using the <code>BigBlast.sh</code> script (<a href="../../bin/BigBlast.sh">see bin</a>). Hits with &gt;70% identity and &gt;90% coverage were manually extracted via Samtools (v1.15.1).</p>
+<pre><code class="language-bash">
+<span class="hljs-comment"># tef</span>
+BigBlast.sh -q ../../data/phylogenies/Tef1a_db.fasta -g FastaList.txt -i 70 -c 90 -blastn -b 
+
+<span class="hljs-comment"># rbp2</span>
+BigBlast.sh -q ../../data/phylogenies/Ena-RPB2.fasta  -g FastaList.txt -i 70 -c 90 -blastn -b 
+</code></pre>
+<p>TEF1-a and RBPii regions were extracted from each genome and a single FASTA created for each sequence. These FASTAs were concatenated to generate a TEF1-a and RBPii multiFASTA files.</p>
+<pre><code class="language-bash"><span class="hljs-comment"># I looped through each directory, as they all started with an &quot;F&quot; and the file ending for each extracted barcode was the same. </span>
+
+<span class="hljs-comment"># tef</span>
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> F* ; <span class="hljs-keyword">do</span> <span class="hljs-built_in">cat</span> <span class="hljs-variable">${i}</span>/*._TEF.fna &gt;&gt; Fusarium_TEF.fna ; <span class="hljs-keyword">done</span> 
+
+<span class="hljs-comment">#rbp2</span>
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> F* ; <span class="hljs-keyword">do</span> <span class="hljs-built_in">cat</span> <span class="hljs-variable">${i}</span>/*._RBP2.fna &gt;&gt; Fusarium_RBP2.fna ; <span class="hljs-keyword">done</span> 
+</code></pre>
+<h2 id="mafft-alignment">MAFFT alignment</h2>
+<p>MAFFT (v7.505) was used align the sequences in the concatenated FASTA, with the command in the shell script <code>MafftCommand.sh</code></p>
+<pre><code class="language-bash"><span class="hljs-comment"># tef</span>
+MafftCommand.sh Fusarium_TEF.fna
+
+<span class="hljs-comment"># rbp2</span>
+MafftCommand.sh Fusarium_RBP2.fna
+</code></pre>
+<p>Overhanging sequences were trimmed manually, and the trimmed output saved for each barcode into a new FASTA files. Some of the isolate names were altered to shorten them, as MAFFT can sometimes trim off longer names.</p>
+<h2 id="iqtree2-analysis">IQtree2 Analysis</h2>
+<p>IQ-TREE was used to (v2.2.0.3) infer maximum-likelihood phylogenies with 1000 ultrafast bootstrap replicates. The <code>Iqtree2Command.sh</code> shell script was used for this also.</p>
+<pre><code class="language-bash"><span class="hljs-comment">#tef</span>
+Iqtree2Command.sh Fusarium_TEF_Additional_Genomes_MAFFT.msa Fusarium_Additional_Species_TEF
+
+<span class="hljs-comment">#rbp2</span>
+Iqtree2Command.sh  Fusarium_RPB2-MAFFTaln.Phylogeny2.msa Fusarium_RPB2-MAFFTaln.Phylogeny2.msa
+</code></pre>
+<p>Phylogenies were then visualised and annotated using <a href="https://itol.embl.de">iTOL</a></p>
+
+        <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+        
+    </body>
+    </html>

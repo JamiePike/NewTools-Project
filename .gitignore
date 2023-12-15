@@ -16,5 +16,7 @@ Thumbs.db
 # Directories with data #
 #########################
 
-data/
+data/genomes
+data/rawdata
+data/sixgenes/FolSixgeneReferences.html
 exp/

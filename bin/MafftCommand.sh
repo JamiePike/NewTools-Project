@@ -12,7 +12,7 @@ python -c "print('=' * 75)"
 echo "MAFFT version:"
 mafft --version 
 echo "MAFFT Command:"
-echo "mafft --adjustdirectionaccurately --reorder " ${infile} ">"  ${infile} ".aln"
+echo "mafft --adjustdirectionaccurately --reorder " ${infile} ">"  ${infile}".aln"
 
 python -c "print('=' * 75)"
 echo "MAFFT log"
