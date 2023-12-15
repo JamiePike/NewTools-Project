@@ -1,8 +1,8 @@
 # Phylogeny of TNAU isolates
 
-TEF1-a and RBPii, common genetic barcodes in *Fusarium*, were used to generate phylogenies for the TNAU genomes.
+TEF1-a and RPBii, common genetic barcodes in *Fusarium*, were used to generate phylogenies for the TNAU genomes.
 
-Databases for TEF1-a and RBPii were compiled from NCBI reference sequences as part of a Undergraduate project with Dr John Clarkson ([see TEF1-a fasta](../../data/phylogenies/Tef1a_db.fasta)).
+Databases for TEF1-a and RPBii were compiled from NCBI reference sequences as part of a Undergraduate project with Dr John Clarkson ([see TEF1-a fasta](../../data/phylogenies/Tef1a_db.fasta)).
 
 The Fusarium assemblies were symlinked from the [data directory](../../data/genomes/All_Fusarium_Genomes/)
 
@@ -19,7 +19,7 @@ BigBlast.sh -q ../../data/phylogenies/Tef1a_db.fasta -g FastaList.txt -i 70 -c 9
 BigBlast.sh -q ../../data/phylogenies/Ena-RPB2.fasta  -g FastaList.txt -i 70 -c 90 -blastn -b 
 ```
 
-TEF1-a and RBPii regions were extracted from each genome and a single FASTA created for each sequence. These FASTAs were concatenated to generate a TEF1-a and RBPii multiFASTA files.
+TEF1-a and RPBii regions were extracted from each genome and a single FASTA created for each sequence. These FASTAs were concatenated to generate a TEF1-a and RPBii multiFASTA files.
 
 ```bash
 # I looped through each directory, as they all started with an "F" and the file ending for each extracted barcode was the same. 
@@ -32,6 +32,8 @@ for i in F* ; do cat ${i}/*._RBP2.fna >> Fusarium_RBP2.fna ; done
 ```
 
 ## MAFFT alignment
+
+Before alignment, the barcodes sequences from the novel species [F. mindanaoense](https://www.mdpi.com/2309-608X/9/4/443) were added.
 
 MAFFT (v7.505) was used align the sequences in the concatenated FASTA, with the command in the shell script `MafftCommand.sh`
 
