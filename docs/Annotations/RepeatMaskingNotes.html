@@ -106,13 +106,6 @@ Number of sequences (bp) added to database: 2443 ( 40920118 bp )
 </blockquote>
 <p>This took approximately 3 hours for S32, and no clean LTR-RTs were kept by LTR_retriever.</p>
 <p>[9/11/2023] Again, no clean LTR-RTs were kept by LTR_retriever for S16 - Wondering if the install has not worked for LTR_retriever. However, I think I can continue using this approach and if install has failed, explain it.</p>
-<pre><code class="language-bash"><span class="hljs-comment"># S32</span>
-grep -c <span class="hljs-string">&quot;&gt;&quot;</span> S32_Fusarium_SpNov-families.fa
-39
-<span class="hljs-comment"># S16</span>
-grep -c <span class="hljs-string">&quot;&gt;&quot;</span> S16_Fusarium_SpNov-families.fa 
-57
-</code></pre>
 <p>Following the tutorial, I added the species code to the head of each element, and split the library into classified and unclassified elements.</p>
 <pre><code class="language-bash"><span class="hljs-comment">#Add the prefix:</span>
 <span class="hljs-built_in">cat</span> S32_Fusarium_SpNov-families.fa | seqkit fx2tab | awk <span class="hljs-string">&#x27;{ print &quot;FusSpNov-S32_&quot;$0 }&#x27;</span> | seqkit tab2fx &gt; S32_Fusarium_SpNov-families.prefix.fa
@@ -128,7 +121,7 @@ grep -c <span class="hljs-string">&quot;&gt;&quot;</span> S16_Fusarium_SpNov-fam
 <li>For S32, this resulted in 5 classified families and 34 unclassified.</li>
 <li>For S16, this resulted in 8 classified families and 49 unclassified.</li>
 <li>For S6, this resulted in 50 classified families and 93 unclassified - I am conscious that some may be from the contaminant. This assembly is very fragmented.</li>
-<li>For SY-2, this resulted in [X] classified families and [X] unclassified.</li>
+<li>For SY-2, this resulted in 3 classified families and 51 unclassified.</li>
 </ul>
 <p>These unclassified families could be classified further with repeat classifier and an additional TE database, such as Repbase. However, we do not have a RepBase subscription, and curating a further database is time consuming and challenging, considering we are potentially working with a novel species and the assemblies are of poor quality, I do not think it is worth the additional work. If we receive better quality raw data, then we can focus on repeat modeling and masking.</p>
 <h2 id="repeat-masker">Repeat Masker</h2>

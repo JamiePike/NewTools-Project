@@ -89,15 +89,6 @@ This took approximately 3 hours for S32, and no clean LTR-RTs were kept by LTR_r
 
 [9/11/2023] Again, no clean LTR-RTs were kept by LTR_retriever for S16 - Wondering if the install has not worked for LTR_retriever. However, I think I can continue using this approach and if install has failed, explain it.
 
-``` bash
-# S32
-grep -c ">" S32_Fusarium_SpNov-families.fa
-39
-# S16
-grep -c ">" S16_Fusarium_SpNov-families.fa 
-57
-```
-
 Following the tutorial, I added the species code to the head of each element, and split the library into classified and unclassified elements.
 
 ``` bash
@@ -116,7 +107,7 @@ cat S32_Fusarium_SpNov-families.prefix.fa | seqkit fx2tab | grep "Unknown" | seq
 - For S32, this resulted in 5 classified families and 34 unclassified.
 - For S16, this resulted in 8 classified families and 49 unclassified.
 - For S6, this resulted in 50 classified families and 93 unclassified - I am conscious that some may be from the contaminant. This assembly is very fragmented.
-- For SY-2, this resulted in [X] classified families and [X] unclassified.
+- For SY-2, this resulted in 3 classified families and 51 unclassified.
 
 These unclassified families could be classified further with repeat classifier and an additional TE database, such as Repbase. However, we do not have a RepBase subscription, and curating a further database is time consuming and challenging, considering we are potentially working with a novel species and the assemblies are of poor quality, I do not think it is worth the additional work. If we receive better quality raw data, then we can focus on repeat modeling and masking.
 
