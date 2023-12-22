@@ -113,6 +113,7 @@ nohup MakerCommand.sh 1>S32_Maker_01_211123.log &
 Here: `/home/u1983390/Projects/NewTools-Proj/IndianGenomeAssemblies/GenomeAnnotations/S32`
 
 Start: 16:54, 21/11/2023
+
 Finish: 22:21, 24/11/2023
 
 ---
@@ -124,7 +125,21 @@ nohup MakerCommand.sh 1>S6_Maker_01_271123.log &
 ```
 
 Start: 10:37, 27/11/2023
+
 Finish: 09:42, 01/12/2023
+
+---
+
+SY-2:
+
+```bash
+nohup ../bin/MakerCommand.sh 1>SY-2_Maker_01_221223.log &
+```
+
+Start:12:03, 22/12/23
+
+Finish:
+
 
 ### Processing Outputs
 
