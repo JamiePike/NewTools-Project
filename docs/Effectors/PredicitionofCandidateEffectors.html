@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Prediction of candidate effectors</title>
+        <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+        
+    </head>
+    <body class="vscode-body vscode-light">
+        <h1 id="prediction-of-candidate-effectors">Prediction of candidate effectors</h1>
+<p>The gene models produced from the MAKER annotations were used to identify candidate effectors in the TNAU datasets. Predicted genes were filtered based on size (&gt;30aa and &lt;450aa), then submitted to SignalP (v4.1), sequences which were predicted to contain a signal peptide were parsed to EffectorP (v2.0.1).</p>
+<h2 id="directory-set-up">Directory set up</h2>
+<p>I created the <code>Effectors</code> directory in the <code>NewTools-project/exp/</code> directory. A subdirectory was then generated to store symlinks the annotation files, and avoid repeatedly typing lengthy paths.</p>
+<pre><code class="language-bash"><span class="hljs-comment"># make the effectors directories </span>
+<span class="hljs-built_in">mkdir</span> -p Effectors Effectors/data
+
+<span class="hljs-comment"># create symlink for annotations. </span>
+
+<span class="hljs-built_in">ln</span> -s ../../GenomeAnnotations/S6/S6_V4.2-FocR1.Contiglabelled.FullMask.maker.output/S6_V4.2-FocR1.Contiglabelled.FullMask.all.maker.proteins.fasta ./
+<span class="hljs-built_in">ln</span> -s ../../GenomeAnnotations/S16/S16_V4-Contiglabelled.FullMask.maker.output/S16_V4-Contiglabelled.FullMask.all.maker.proteins.fasta ./
+<span class="hljs-built_in">ln</span> -s ../../GenomeAnnotations/S32/S32_V5-FS66-Contiglabelled.FullMask.maker.output/S32_V5-FS66-Contiglabelled.FullMask.all.maker.proteins.fasta ./
+<span class="hljs-built_in">ln</span> -s ../../GenomeAnnotations/SY-2/SY-2_V5-RepeatMasked.maker.output/SY-2_V5-RepeatMasked.all.maker.proteins.fasta ./
+</code></pre>
+<h2 id="size-filtering">Size filtering</h2>
+<p>Once the annotation files had been linked, i reduced the total number of candidates from each by filtering the effectors based on size.</p>
+<pre><code class="language-bash"><span class="hljs-comment"># generate the processing directory.</span>
+<span class="hljs-built_in">mkdir</span> sizeFilter
+
+<span class="hljs-comment"># generate index file for size filtering.</span>
+<span class="hljs-built_in">cd</span> data 
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> * ; <span class="hljs-keyword">do</span> <span class="hljs-built_in">echo</span> <span class="hljs-variable">$i</span> ; samtools faidx <span class="hljs-variable">${i}</span> ; <span class="hljs-keyword">done</span> 
+
+<span class="hljs-comment"># filter all sequences by size and create sorted bed file of short sequences . &lt;450aa and &gt;30aa accepted. </span>
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> *.fai ; <span class="hljs-keyword">do</span> <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;<span class="hljs-variable">${i}</span>...&quot;</span> ; awk <span class="hljs-string">&#x27;{if($2 &lt; 450 &amp;&amp; $2 &gt; 30) print $1 &quot;\t0\t&quot; $2 &quot;\t&quot;}&#x27;</span> <span class="hljs-variable">${i}</span> &gt; ../sizeFilter/<span class="hljs-variable">${i}</span>.sizeFilter.bed ; bedtools <span class="hljs-built_in">sort</span> -i ../sizeFilter/<span class="hljs-variable">${i}</span>.sizeFilter.bed &gt; ../sizeFilter/<span class="hljs-variable">${i}</span>.sizeFilter.sorted.bed ; <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;done.&quot;</span> ; <span class="hljs-keyword">done</span>
+
+<span class="hljs-comment"># generate fasta of filtered sequences</span>
+<span class="hljs-comment">#---</span>
+<span class="hljs-comment"># S6</span>
+bedtools getfasta -s -<span class="hljs-keyword">fi</span> S6_V4.2-FocR1.Contiglabelled.FullMask.all.maker.proteins.fasta -bed ../sizeFilter/S6_V4.2-FocR1.Contiglabelled.FullMask.all.maker.proteins.fasta.fai.sizeFilter.sorted.bed -fo ../sizeFilter/S6_V4.2-FocR1.Contiglabelled.FullMask.all.maker.proteins.sizeFilter.sorted.fasta
+
+<span class="hljs-comment"># S16 </span>
+bedtools getfasta -s -<span class="hljs-keyword">fi</span> S16_V4-Contiglabelled.FullMask.all.maker.proteins.fasta -bed ../sizeFilter/S16_V4-Contiglabelled.FullMask.all.maker.proteins.fasta.fai.sizeFilter.sorted.bed -fo ../sizeFilter/S16_V4-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta
+
+<span class="hljs-comment"># S32</span>
+bedtools getfasta -s -<span class="hljs-keyword">fi</span> S32_V5-FS66-Contiglabelled.FullMask.all.maker.proteins.fasta -bed ../sizeFilter/S32_V5-FS66-Contiglabelled.FullMask.all.maker.proteins.fasta.fai.sizeFilter.sorted.bed -fo ../sizeFilter/S32_V5-FS66-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta
+
+<span class="hljs-comment"># SY-2</span>
+bedtools getfasta -s -<span class="hljs-keyword">fi</span>  SY-2_V5-RepeatMasked.all.maker.proteins.fasta -bed ../sizeFilter/SY-2_V5-RepeatMasked.all.maker.proteins.fasta.fai.sizeFilter.sorted.bed -fo ../sizeFilter/SY-2_V5-RepeatMasked.all.maker.proteins.sizeFilter.fasta
+
+<span class="hljs-built_in">cd</span> ../sizeFilter/
+
+<span class="hljs-comment"># check the number of short sequences for each isolate</span>
+grep -c <span class="hljs-string">&quot;&gt;&quot;</span> *.fasta
+S16_V4-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta:9148
+S32_V5-FS66-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta:9253
+S6_V4.2-FocR1.Contiglabelled.FullMask.all.maker.proteins.sizeFilter.sorted.fasta:10946
+SY-2_V5-RepeatMasked.all.maker.proteins.sizeFilter.fasta:9115
+</code></pre>
+
+        <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+        
+    </body>
+    </html>

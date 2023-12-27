@@ -137,23 +137,21 @@ SendEmail.py <span class="hljs-string">&quot;Maker Annotation Complete&quot;</sp
 <pre><code class="language-bash"><span class="hljs-built_in">nohup</span> ../bin/MakerCommand.sh 1&gt;SY-2_Maker_01_221223.<span class="hljs-built_in">log</span> &amp;
 </code></pre>
 <p>Start:12:03, 22/12/23</p>
-<p>Finish:</p>
+<p>Finish: 09:40, 25/12/23</p>
 <h3 id="processing-outputs">Processing Outputs</h3>
 <p>Summary of outputs:</p>
 <ul>
 <li>S6: all contigs were successfully annotated.</li>
 <li>S16: all contigs were successfully annotated.</li>
 <li>S32: all contigs were successfully annotated.</li>
-<li>SY-2:</li>
-<li>S32_2:</li>
-<li>S56:</li>
+<li>SY-2: all contigs were successfully annotated.</li>
 </ul>
 <p>I therefore merged the output FASTA and GFF files, using the maker inbuilt <code>fasta_merge</code> and <code>gff_merge</code>.</p>
 <pre><code class="language-bash"><span class="hljs-comment"># example for S16</span>
 
-fasta_merge -d S16_V4-Contiglabelled.FullMask_master_datastore_index.<span class="hljs-built_in">log</span> <span class="hljs-comment"># -g ensure we take only the Maker outputs, and not BLAST alignments etc.</span>
+fasta_merge -d S16_V4-Contiglabelled.FullMask_master_datastore_index.<span class="hljs-built_in">log</span> 
 
-gff3_merge -g -d S16_V4-Contiglabelled.FullMask_master_datastore_index.<span class="hljs-built_in">log</span>
+gff3_merge -g -d S16_V4-Contiglabelled.FullMask_master_datastore_index.<span class="hljs-built_in">log</span> <span class="hljs-comment"># -g ensure we take only the Maker outputs, and not BLAST alignments etc.</span>
 </code></pre>
 <p>I then tried to gauge the quality of the annotations using the following steps.</p>
 <p>First, I checked the number of gene models for, and compared it to similarly sized Fusarium assemblies.</p>
@@ -165,9 +163,7 @@ awk <span class="hljs-string">&#x27;{ if ($3 == &quot;gene&quot;) print $0 }&#x2
 <li>S6: 17891 1418.74</li>
 <li>S16: 15727 1521.13</li>
 <li>S32: 15824 1491.34</li>
-<li>S32_2</li>
-<li>SY-2</li>
-<li>S56</li>
+<li>SY-2: 15719 1522.19</li>
 </ul>
 <p>I then checked the AED score output using the <code>AED_cdf_generator.pl</code> script supplied with MAKER, and used <a href="/Volumes/Jamie_EXT/Projects/NewToolsProject/exp/GenomeAnnotations/bin/SadikShared">Sadik's script</a> to generate a figure.</p>
 <pre><code class="language-bash"><span class="hljs-comment"># use AED generator.</span>
@@ -178,7 +174,7 @@ perl AED_cdf_generator.pl -b 0.010 S16_V4-Contiglabelled.FullMask.all.gff &gt; S
 
 <span class="hljs-built_in">nohup</span> busco -i  S16_V4-Contiglabelled.FullMask.all.maker.transcripts.fasta -o busco_Hypocreales -l hypocreales -m transcriptome -c 1 -f 1&gt;BuscoOfTranscripts.<span class="hljs-built_in">log</span> &amp;
 </code></pre>
-<h3 id="busco-results-for-isolate-predicted-transcripts">BUSCO results for isolate predicted transcripts.</h3>
+<h3 id="busco-results-for-isolate-predicted-transcripts">BUSCO results for isolate predicted transcripts</h3>
 <pre><code class="language-bash"><span class="hljs-comment">#  S16 transcripts:</span>
  --------------------------------------------------
  |Results from dataset hypocreales_odb10           |
@@ -217,6 +213,20 @@ perl AED_cdf_generator.pl -b 0.010 S16_V4-Contiglabelled.FullMask.all.gff &gt; S
  |22 Complete and duplicated BUSCOs (D)        |
  |13 Fragmented BUSCOs (F)                     |
  |27 Missing BUSCOs (M)                        |
+ |4494 Total BUSCO <span class="hljs-built_in">groups</span> searched               |
+ --------------------------------------------------
+
+<span class="hljs-comment"># SY-2 transcripts:</span>
+
+ --------------------------------------------------
+ |Results from dataset hypocreales_odb10           |
+ --------------------------------------------------
+ |C:98.8%[S:98.6%,D:0.2%],F:0.4%,M:0.8%,n:4494     |
+ |4441 Complete BUSCOs (C)                       |
+ |4432 Complete and single-copy BUSCOs (S)       |
+ |9 Complete and duplicated BUSCOs (D)        |
+ |20 Fragmented BUSCOs (F)                     |
+ |33 Missing BUSCOs (M)                        |
  |4494 Total BUSCO <span class="hljs-built_in">groups</span> searched               |
  --------------------------------------------------
 

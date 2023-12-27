@@ -138,7 +138,7 @@ nohup ../bin/MakerCommand.sh 1>SY-2_Maker_01_221223.log &
 
 Start:12:03, 22/12/23
 
-Finish:
+Finish: 09:40, 25/12/23
 
 ### Processing Outputs
 
@@ -147,18 +147,16 @@ Summary of outputs:
 - S6: all contigs were successfully annotated.
 - S16: all contigs were successfully annotated.
 - S32: all contigs were successfully annotated.
-- SY-2:
-- S32_2:
-- S56:
+- SY-2: all contigs were successfully annotated.
 
 I therefore merged the output FASTA and GFF files, using the maker inbuilt `fasta_merge` and `gff_merge`.
 
 ```bash
 # example for S16
 
-fasta_merge -d S16_V4-Contiglabelled.FullMask_master_datastore_index.log # -g ensure we take only the Maker outputs, and not BLAST alignments etc.
+fasta_merge -d S16_V4-Contiglabelled.FullMask_master_datastore_index.log 
 
-gff3_merge -g -d S16_V4-Contiglabelled.FullMask_master_datastore_index.log
+gff3_merge -g -d S16_V4-Contiglabelled.FullMask_master_datastore_index.log # -g ensure we take only the Maker outputs, and not BLAST alignments etc.
 ```
 
 I then tried to gauge the quality of the annotations using the following steps.
@@ -175,9 +173,7 @@ Results
 - S6: 17891 1418.74
 - S16: 15727 1521.13
 - S32: 15824 1491.34
-- S32_2
-- SY-2
-- S56
+- SY-2: 15719 1522.19
 
 I then checked the AED score output using the `AED_cdf_generator.pl` script supplied with MAKER, and used [Sadik's script](/Volumes/Jamie_EXT/Projects/NewToolsProject/exp/GenomeAnnotations/bin/SadikShared) to generate a figure.
 
@@ -194,7 +190,7 @@ I also ran BUSCO on the `S16_V4-Contiglabelled.FullMask.all.maker.transcripts.fa
 nohup busco -i  S16_V4-Contiglabelled.FullMask.all.maker.transcripts.fasta -o busco_Hypocreales -l hypocreales -m transcriptome -c 1 -f 1>BuscoOfTranscripts.log &
 ```
 
-### BUSCO results for isolate predicted transcripts.
+### BUSCO results for isolate predicted transcripts
 
 ```bash
 #  S16 transcripts:
@@ -235,6 +231,20 @@ nohup busco -i  S16_V4-Contiglabelled.FullMask.all.maker.transcripts.fasta -o bu
  |22 Complete and duplicated BUSCOs (D)        |
  |13 Fragmented BUSCOs (F)                     |
  |27 Missing BUSCOs (M)                        |
+ |4494 Total BUSCO groups searched               |
+ --------------------------------------------------
+
+# SY-2 transcripts:
+
+ --------------------------------------------------
+ |Results from dataset hypocreales_odb10           |
+ --------------------------------------------------
+ |C:98.8%[S:98.6%,D:0.2%],F:0.4%,M:0.8%,n:4494     |
+ |4441 Complete BUSCOs (C)                       |
+ |4432 Complete and single-copy BUSCOs (S)       |
+ |9 Complete and duplicated BUSCOs (D)        |
+ |20 Fragmented BUSCOs (F)                     |
+ |33 Missing BUSCOs (M)                        |
  |4494 Total BUSCO groups searched               |
  --------------------------------------------------
 
