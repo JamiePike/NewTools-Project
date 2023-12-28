@@ -92,7 +92,7 @@ SY-2_V5-RepeatMasked.all.maker.proteins.sizeFilter.fasta:9115
 </code></pre>
 <h2 id="signalp">Signalp</h2>
 <p>I created a directory for the analysis, <code>mkdir signalp</code>. The size filtered fasta files were then symlinked in the <code>signalp</code> directory.</p>
-<p>I  filtered the short sequences through signalp using the following shell script <code>signalp.sh</code>.</p>
+<p>I  filtered the short sequences through signalp (v5) using the following shell script <code>signalp.sh</code>.</p>
 <pre><code class="language-bash"><span class="hljs-meta">#!/bin/bash</span>
 
 <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> *.fasta ; <span class="hljs-keyword">do</span> 
@@ -107,8 +107,17 @@ SY-2_V5-RepeatMasked.all.maker.proteins.sizeFilter.fasta:9115
     <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;done.&quot;</span> ;
 <span class="hljs-keyword">done</span>
 </code></pre>
+<p>The shell script was run from the command line as follows,</p>
 <pre><code class="language-bash"><span class="hljs-comment"># run using this command</span>
- <span class="hljs-built_in">nohup</span> ./signalp.sh 1&gt;signal.log &amp;
+./signalp.sh 2&gt;1&amp; | <span class="hljs-built_in">tee</span> signalp.log
+</code></pre>
+<h2 id="effectorp">EffectorP</h2>
+<p>Likely effectors were then predicted from this small secreted protein set using EffectorP (v2.0.1), run in the <code>signalp</code> directory using the following command:</p>
+<pre><code class="language-bash"><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> *.fasta ; <span class="hljs-keyword">do</span> 
+    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;processing <span class="hljs-variable">${i}</span>...&quot;</span> ;
+    EffectorP.py -i ./<span class="hljs-variable">${i}</span>-signalp.filtered.fasta -E ../effectorp/<span class="hljs-variable">${i}</span>-EffectorP.filtered.fasta &gt; ../effectorp/<span class="hljs-variable">${i}</span>-EffectorP.filtered.log ; 
+    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;done.&quot;</span> ;
+<span class="hljs-keyword">done</span> 
 </code></pre>
 
         <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>

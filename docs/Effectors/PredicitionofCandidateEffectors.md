@@ -61,7 +61,7 @@ SY-2_V5-RepeatMasked.all.maker.proteins.sizeFilter.fasta:9115
 
 I created a directory for the analysis, `mkdir signalp`. The size filtered fasta files were then symlinked in the `signalp` directory.
 
-I  filtered the short sequences through signalp using the following shell script `signalp.sh`.
+I  filtered the short sequences through signalp (v5) using the following shell script `signalp.sh`.
 
 ```bash
 #!/bin/bash
@@ -79,7 +79,21 @@ for i in *.fasta ; do
 done
 ```
 
+The shell script was run from the command line as follows,
+
 ```bash
 # run using this command
- nohup ./signalp.sh 1>signal.log &
+./signalp.sh 2>1& | tee signalp.log
+```
+
+## EffectorP
+
+Likely effectors were then predicted from this small secreted protein set using EffectorP (v2.0.1), run in the `signalp` directory using the following command:
+
+```bash
+for i in *.fasta ; do 
+    echo "processing ${i}..." ;
+    EffectorP.py -i ./${i}-signalp.filtered.fasta -E ../effectorp/${i}-EffectorP.filtered.fasta > ../effectorp/${i}-EffectorP.filtered.log ; 
+    echo "done." ;
+done 
 ```
