@@ -117,19 +117,20 @@ SY-2_V5-RepeatMasked.all.maker.proteins.sizeFilter.fasta:9115
 <span class="hljs-built_in">mkdir</span> ../effectorp
 
 <span class="hljs-comment"># run effectorp</span>
-<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> *.fasta ; <span class="hljs-keyword">do</span> 
-    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;processing <span class="hljs-variable">${i}</span>...&quot;</span> ;
-    EffectorP.py -i ./<span class="hljs-variable">${i}</span>-signalp.filtered.fasta -E ../effectorp/<span class="hljs-variable">${i}</span>-EffectorP.filtered.fasta &gt; ../effectorp/<span class="hljs-variable">${i}</span>-EffectorP.filtered.log ; 
-    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;done.&quot;</span> ;
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> *-signalp.filtered.fasta ; <span class="hljs-keyword">do</span> \
+    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;processing <span class="hljs-variable">${i}</span>...&quot;</span> ; \
+    EffectorP.py -i ./<span class="hljs-variable">${i}</span> -E ../effectorp/<span class="hljs-variable">${i}</span>-EffectorP.filtered.fasta &gt; ../effectorp/<span class="hljs-variable">${i}</span>-EffectorP.filtered.log ; \
+    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;done.&quot;</span> ; \
 <span class="hljs-keyword">done</span> 
 </code></pre>
 <p>I checked the total number of candidates per assembly using grep.</p>
 <pre><code class="language-bash"><span class="hljs-built_in">cd</span> ../effectorp/
 grep -c  <span class="hljs-string">&quot;&gt;&quot;</span> *.fasta
-S16_V4-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta-EffectorP.filtered.fasta:289
-S32_V5-FS66-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta-EffectorP.filtered.fasta:314
-S6_V4.2-FocR1.Contiglabelled.FullMask.all.maker.proteins.sizeFilter.sorted.fasta-EffectorP.filtered.fasta:333
-SY-2_V5-RepeatMasked.all.maker.proteins.sizeFilter.fasta-EffectorP.filtered.fasta:289
+S16_V4-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta-signalp.filtered.fasta-EffectorP.filtered.fasta:289
+S32_V5-FS66-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta-signalp.filtered.fasta-EffectorP.filtered.fasta:314
+S6_V4.2-FocR1.Contiglabelled.FullMask.all.maker.proteins.sizeFilter.sorted.fasta-signalp.filtered.fasta-EffectorP.filtered.fasta:333
+SY-2_V5-RepeatMasked.all.maker.proteins.sizeFilter.fasta-signalp.filtered.fasta-EffectorP.filtered.fasta:289
+
 </code></pre>
 
         <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
