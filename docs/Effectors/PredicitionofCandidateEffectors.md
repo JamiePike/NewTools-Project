@@ -83,7 +83,7 @@ The shell script was run from the command line as follows,
 
 ```bash
 # run using this command
-./signalp.sh 2>1& | tee signalp.log
+../../bin/signalp.sh 2>1& | tee signalp.log
 ```
 
 ## EffectorP
