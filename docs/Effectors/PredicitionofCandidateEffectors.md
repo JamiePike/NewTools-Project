@@ -91,9 +91,24 @@ The shell script was run from the command line as follows,
 Likely effectors were then predicted from this small secreted protein set using EffectorP (v2.0.1), run in the `signalp` directory using the following command:
 
 ```bash
+# make directory for effectorp output
+mkdir ../effectorp
+
+# run effectorp
 for i in *.fasta ; do 
     echo "processing ${i}..." ;
     EffectorP.py -i ./${i}-signalp.filtered.fasta -E ../effectorp/${i}-EffectorP.filtered.fasta > ../effectorp/${i}-EffectorP.filtered.log ; 
     echo "done." ;
 done 
+```
+
+I checked the total number of candidates per assembly using grep.
+
+```bash
+cd ../effectorp/
+grep -c  ">" *.fasta
+S16_V4-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta-EffectorP.filtered.fasta:289
+S32_V5-FS66-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta-EffectorP.filtered.fasta:314
+S6_V4.2-FocR1.Contiglabelled.FullMask.all.maker.proteins.sizeFilter.sorted.fasta-EffectorP.filtered.fasta:333
+SY-2_V5-RepeatMasked.all.maker.proteins.sizeFilter.fasta-EffectorP.filtered.fasta:289
 ```
