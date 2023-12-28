@@ -56,3 +56,30 @@ S32_V5-FS66-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta:9253
 S6_V4.2-FocR1.Contiglabelled.FullMask.all.maker.proteins.sizeFilter.sorted.fasta:10946
 SY-2_V5-RepeatMasked.all.maker.proteins.sizeFilter.fasta:9115
 ```
+
+## Signalp
+
+I created a directory for the analysis, `mkdir signalp`. The size filtered fasta files were then symlinked in the `signalp` directory.
+
+I  filtered the short sequences through signalp using the following shell script `signalp.sh`.
+
+```bash
+#!/bin/bash
+
+for i in *.fasta ; do 
+    echo "Processing ${i}..." ;  
+    signalp -fasta ./${i} 1>./${i}-signalp.out 2>./${i}-signalp.log #Identify sequences with signal peptide.
+    echo "Generating index files..." ;
+    awk '$2 ~ /SP\(Sec\/SPI\)/ {print $1}' ./${i}/${i}-Translated_summary.signalp5 > ./${i}-signalPepPositives.list;
+    echo "Generating fasta...";
+    for j in $(cat ./${i}-signalPepPositives.list); do 
+        samtools faidx ./${i} ${j}; 
+        done > ./${i}-signalp.filtered.fasta;
+    echo "done." ;
+done
+```
+
+```bash
+# run using this command
+nohup ./signalp.sh 2>&1 | tee signalp.log
+```

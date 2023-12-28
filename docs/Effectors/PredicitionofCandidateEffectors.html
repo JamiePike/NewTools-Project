@@ -90,6 +90,26 @@ S32_V5-FS66-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta:9253
 S6_V4.2-FocR1.Contiglabelled.FullMask.all.maker.proteins.sizeFilter.sorted.fasta:10946
 SY-2_V5-RepeatMasked.all.maker.proteins.sizeFilter.fasta:9115
 </code></pre>
+<h2 id="signalp">Signalp</h2>
+<p>I created a directory for the analysis, <code>mkdir signalp</code>. The size filtered fasta files were then symlinked in the <code>signalp</code> directory.</p>
+<p>I  filtered the short sequences through signalp using the following shell script <code>signalp.sh</code>.</p>
+<pre><code class="language-bash"><span class="hljs-meta">#!/bin/bash</span>
+
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> *.fasta ; <span class="hljs-keyword">do</span> 
+    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Processing <span class="hljs-variable">${i}</span>...&quot;</span> ;  
+    signalp -fasta ./<span class="hljs-variable">${i}</span> 1&gt;./<span class="hljs-variable">${i}</span>-signalp.out 2&gt;./<span class="hljs-variable">${i}</span>-signalp.log <span class="hljs-comment">#Identify sequences with signal peptide.</span>
+    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Generating index files...&quot;</span> ;
+    awk <span class="hljs-string">&#x27;$2 ~ /SP\(Sec\/SPI\)/ {print $1}&#x27;</span> ./<span class="hljs-variable">${i}</span>/<span class="hljs-variable">${i}</span>-Translated_summary.signalp5 &gt; ./<span class="hljs-variable">${i}</span>-signalPepPositives.list;
+    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Generating fasta...&quot;</span>;
+    <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> $(<span class="hljs-built_in">cat</span> ./<span class="hljs-variable">${i}</span>-signalPepPositives.list); <span class="hljs-keyword">do</span> 
+        samtools faidx ./<span class="hljs-variable">${i}</span> <span class="hljs-variable">${j}</span>; 
+        <span class="hljs-keyword">done</span> &gt; ./<span class="hljs-variable">${i}</span>-signalp.filtered.fasta;
+    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;done.&quot;</span> ;
+<span class="hljs-keyword">done</span>
+</code></pre>
+<pre><code class="language-bash"><span class="hljs-comment"># run using this command</span>
+<span class="hljs-built_in">nohup</span> ./signalp.sh 2&gt;&amp;1 | <span class="hljs-built_in">tee</span> signalp.log
+</code></pre>
 
         <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
         
