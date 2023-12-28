@@ -81,5 +81,5 @@ done
 
 ```bash
 # run using this command
-nohup ./signalp.sh 2>&1 | tee signalp.log
+ nohup ./signalp.sh 1>signal.log &
 ```
