@@ -111,5 +111,58 @@ S16_V4-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta-signalp.filte
 S32_V5-FS66-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta-signalp.filtered.fasta-EffectorP.filtered.fasta:314
 S6_V4.2-FocR1.Contiglabelled.FullMask.all.maker.proteins.sizeFilter.sorted.fasta-signalp.filtered.fasta-EffectorP.filtered.fasta:333
 SY-2_V5-RepeatMasked.all.maker.proteins.sizeFilter.fasta-signalp.filtered.fasta-EffectorP.filtered.fasta:289
-
 ```
+
+As the file names have become very large, I renamed the fastas. 
+
+```bash
+# S6
+mv S6_V4.2-FocR1.Contiglabelled.FullMask.all.maker.proteins.sizeFilter.sorted.fasta-signalp.filtered.fasta-EffectorP.filtered.fasta S6_V4.2-candidateEffectors.fasta
+
+# S16
+mv S16_V4-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta-signalp.filtered.fasta-EffectorP.filtered.fasta S16_V4-candidateEffectors.fasta
+
+# S32
+mv S32_V5-FS66-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta-signalp.filtered.fasta-EffectorP.filtered.fasta S32_V5-FS66-candidateEffectors.fasta
+
+# SY-2
+mv SY-2_V5-RepeatMasked.all.maker.proteins.sizeFilter.fasta-signalp.filtered.fasta-EffectorP.filtered.fasta SY-2_V5-candidateEffectors.fasta
+```
+
+I then clustered the candidate effectors at 80% identity to identify shared candidates. Initially, i had to create a single fasta.
+
+```bash
+# create an empty file to hold all of the candidate effectors.
+touch ./AllCandidateEffectorSets.fasta 
+echo "Clustering final effector sets..."
+for i in *.fasta; 
+# Add genome filename to start of Fasta Headers so we know which isolate this came from and  combine all of the individual candidate effector sets by adding them to the empty candidate effector fasta.
+  do
+  awk '/>/{sub(">","&"FILENAME"_");sub(/\.fasta/,x)}1' ${i} >> AllCandidateEffectorSets.fasta ; 
+done 
+```
+
+Then cluster the effectors by sequence identity (80%).
+
+```bash
+# make a directory for the cdhit output
+mkdir cdhit
+
+# symlink the cdhit input file (from the effectorp dir).
+ln -s AllCandidateEffectorSets.fasta ../cdhit/
+
+cdhit -i ../effectorp/AllCandidateEffectorSets.fasta -d 0 -o ./AllCandidateEffectorSets -c 0.80 -n 5  -G 1 -g 0 -b 20 -l 10 -s 0.0 -aL 0.0 -aS 0.0 1> cd-hit.log
+```
+
+I processed the `cd-hit` data using a custom R script, [ProcessingCdhit.R](https://github.com/JamiePike/NewTools-Project/blob/master/bin/ProcessingCdhit.R).
+
+I renamed the cdhit output fasta too `mv AllCandidateEffectorSets AllCandidateEffectorSets_cdhit.fasta`
+
+I then tried to identify some of the 
+
+---
+
+Going forward...
+
+- BLAST against focub genomes?
+- BLAST focub set against these assemblies?

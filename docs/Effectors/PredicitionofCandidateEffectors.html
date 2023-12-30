@@ -130,8 +130,46 @@ S16_V4-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta-signalp.filte
 S32_V5-FS66-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta-signalp.filtered.fasta-EffectorP.filtered.fasta:314
 S6_V4.2-FocR1.Contiglabelled.FullMask.all.maker.proteins.sizeFilter.sorted.fasta-signalp.filtered.fasta-EffectorP.filtered.fasta:333
 SY-2_V5-RepeatMasked.all.maker.proteins.sizeFilter.fasta-signalp.filtered.fasta-EffectorP.filtered.fasta:289
-
 </code></pre>
+<p>As the file names have become very large, I renamed the fastas.</p>
+<pre><code class="language-bash"><span class="hljs-comment"># S6</span>
+<span class="hljs-built_in">mv</span> S6_V4.2-FocR1.Contiglabelled.FullMask.all.maker.proteins.sizeFilter.sorted.fasta-signalp.filtered.fasta-EffectorP.filtered.fasta S6_V4.2-candidateEffectors.fasta
+
+<span class="hljs-comment"># S16</span>
+<span class="hljs-built_in">mv</span> S16_V4-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta-signalp.filtered.fasta-EffectorP.filtered.fasta S16_V4-candidateEffectors.fasta
+
+<span class="hljs-comment"># S32</span>
+<span class="hljs-built_in">mv</span> S32_V5-FS66-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta-signalp.filtered.fasta-EffectorP.filtered.fasta S32_V5-FS66-candidateEffectors.fasta
+
+<span class="hljs-comment"># SY-2</span>
+<span class="hljs-built_in">mv</span> SY-2_V5-RepeatMasked.all.maker.proteins.sizeFilter.fasta-signalp.filtered.fasta-EffectorP.filtered.fasta SY-2_V5-candidateEffectors.fasta
+</code></pre>
+<p>I then clustered the candidate effectors at 80% identity to identify shared candidates. Initially, i had to create a single fasta.</p>
+<pre><code class="language-bash"><span class="hljs-comment"># create an empty file to hold all of the candidate effectors.</span>
+<span class="hljs-built_in">touch</span> ./AllCandidateEffectorSets.fasta 
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Clustering final effector sets...&quot;</span>
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> *.fasta; 
+<span class="hljs-comment"># Add genome filename to start of Fasta Headers so we know which isolate this came from and  combine all of the individual candidate effector sets by adding them to the empty candidate effector fasta.</span>
+  <span class="hljs-keyword">do</span>
+  awk <span class="hljs-string">&#x27;/&gt;/{sub(&quot;&gt;&quot;,&quot;&amp;&quot;FILENAME&quot;_&quot;);sub(/\.fasta/,x)}1&#x27;</span> <span class="hljs-variable">${i}</span> &gt;&gt; AllCandidateEffectorSets.fasta ; 
+<span class="hljs-keyword">done</span> 
+</code></pre>
+<p>Then cluster the effectors by sequence identity (80%).</p>
+<pre><code class="language-bash"><span class="hljs-comment"># make a directory for the cdhit output</span>
+<span class="hljs-built_in">mkdir</span> cdhit
+
+<span class="hljs-comment"># symlink the cdhit input file (from the effectorp dir).</span>
+<span class="hljs-built_in">ln</span> -s AllCandidateEffectorSets.fasta ../cdhit/
+
+cdhit -i ../effectorp/AllCandidateEffectorSets.fasta -d 0 -o ./AllCandidateEffectorSets -c 0.80 -n 5  -G 1 -g 0 -b 20 -l 10 -s 0.0 -aL 0.0 -aS 0.0 1&gt; cd-hit.log
+</code></pre>
+<p>I processed the <code>cd-hit</code> data using a custom python script, <a href="https://github.com/JamiePike/NewTools-Project/blob/master/bin/ProcessingCdhit.py">ProcessingCdhit.py</a>.</p>
+<hr>
+<p>Going forward...</p>
+<ul>
+<li>BLAST against focub genomes?</li>
+<li>BLAST focub set against these assemblies?</li>
+</ul>
 
         <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
         
