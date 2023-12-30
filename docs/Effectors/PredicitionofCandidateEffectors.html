@@ -164,6 +164,8 @@ SY-2_V5-RepeatMasked.all.maker.proteins.sizeFilter.fasta-signalp.filtered.fasta-
 cdhit -i ../effectorp/AllCandidateEffectorSets.fasta -d 0 -o ./AllCandidateEffectorSets -c 0.80 -n 5  -G 1 -g 0 -b 20 -l 10 -s 0.0 -aL 0.0 -aS 0.0 1&gt; cd-hit.log
 </code></pre>
 <p>I processed the <code>cd-hit</code> data using a custom python script, <a href="https://github.com/JamiePike/NewTools-Project/blob/master/bin/ProcessingCdhit.py">ProcessingCdhit.py</a>.</p>
+<p>I renamed the cdhit output fasta too <code>mv AllCandidateEffectorSets AllCandidateEffectorSets_cdhit.fasta</code></p>
+<p>I then tried to identify some of the interesting groups or candidates by plotting as a Venn diagram, using the <a href="https://github.com/JamiePike/NewTools-Project/blob/master/bin/CandidateEffectorsVenn.R"><code>CandidateEffectorsVenn.R</code></a> script.</p>
 <hr>
 <p>Going forward...</p>
 <ul>

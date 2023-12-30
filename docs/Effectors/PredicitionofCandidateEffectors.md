@@ -154,11 +154,11 @@ ln -s AllCandidateEffectorSets.fasta ../cdhit/
 cdhit -i ../effectorp/AllCandidateEffectorSets.fasta -d 0 -o ./AllCandidateEffectorSets -c 0.80 -n 5  -G 1 -g 0 -b 20 -l 10 -s 0.0 -aL 0.0 -aS 0.0 1> cd-hit.log
 ```
 
-I processed the `cd-hit` data using a custom R script, [ProcessingCdhit.R](https://github.com/JamiePike/NewTools-Project/blob/master/bin/ProcessingCdhit.R).
+I processed the `cd-hit` data using a custom python script, [ProcessingCdhit.py](https://github.com/JamiePike/NewTools-Project/blob/master/bin/ProcessingCdhit.py).
 
 I renamed the cdhit output fasta too `mv AllCandidateEffectorSets AllCandidateEffectorSets_cdhit.fasta`
 
-I then tried to identify some of the 
+I then tried to identify some of the interesting groups or candidates by plotting as a Venn diagram, using the [`CandidateEffectorsVenn.R`](https://github.com/JamiePike/NewTools-Project/blob/master/bin/CandidateEffectorsVenn.R) script.
 
 ---
 
