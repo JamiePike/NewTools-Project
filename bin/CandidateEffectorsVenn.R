@@ -25,7 +25,9 @@ ggvenn_data <- list(
 
 # Create the Venn diagram using ggplot2 and ggvenn
 ggvenn_plot <- ggvenn(ggvenn_data, fill_color = c("#0073C2FF", "#EFC000FF", "#868686FF", "#CD534CFF"),
-  stroke_size = 0.5, set_name_size = 4)
+  stroke_size = 0.5, set_name_size = 4, show_percentage = FALSE) +
+  coord_fixed() +
+  theme_void()
 
 # Save the Venn diagram
 ggsave("/Volumes/Jamie_EXT/Projects/NewToolsProject/exp/Effectors/cdhit/sharedCandEffsVenn.png", plot = ggvenn_plot, width = 8, height = 6, units = "in")
