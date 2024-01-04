@@ -47,30 +47,58 @@
 <p>The Fusarium assemblies were symlinked from the <a href="../../data/genomes/All_Fusarium_Genomes/">data directory</a></p>
 <h2 id="blastn-search">BLASTN Search</h2>
 <p>Using BLASTN (v2.9.0+; <code>1e-6</code> cut-off), homologs were identified in our Fusarium assembly database and the TNAU genomes using the <code>BigBlast.sh</code> script (<a href="../../bin/BigBlast.sh">see bin</a>). Hits with &gt;70% identity and &gt;90% coverage were manually extracted via Samtools (v1.15.1).</p>
-<pre><code class="language-bash">
-<span class="hljs-comment"># tef</span>
-BigBlast.sh -q ../../data/phylogenies/Tef1a_db.fasta -g FastaList.txt -i 70 -c 90 -blastn -b 
+<pre><code class="language-bash"><span class="hljs-comment"># tef</span>
+<span class="hljs-built_in">mkdir</span> TEF <span class="hljs-comment"># create dir</span>
+<span class="hljs-built_in">cd</span> TEF <span class="hljs-comment"># move into it</span>
+<span class="hljs-built_in">cp</span> ../../data/* ./ <span class="hljs-comment">#copy data</span>
+BigBlast.sh -q Tef1a_db.fasta -g FastaList.txt -i 70 -c 90 -t blastn -b <span class="hljs-comment">#run search</span>
+<span class="hljs-built_in">cd</span> .. <span class="hljs-comment"># move out of dir</span>
 
 <span class="hljs-comment"># rbp2</span>
-BigBlast.sh -q ../../data/phylogenies/Ena-RPB2.fasta  -g FastaList.txt -i 70 -c 90 -blastn -b 
+<span class="hljs-built_in">mkdir</span> RPBii <span class="hljs-comment"># create dir</span>
+<span class="hljs-built_in">cd</span> RPBii <span class="hljs-comment"># move into it </span>
+<span class="hljs-built_in">cp</span> ../../data/* ./ <span class="hljs-comment">#copy data </span>
+BigBlast.sh -q Ena-RPB2.fasta  -g FastaList.txt -i 70 -c 90 -t blastn -b <span class="hljs-comment">#run search</span>
 </code></pre>
-<p>TEF1-a and RPBii regions were extracted from each genome and a single FASTA created for each sequence. These FASTAs were concatenated to generate a TEF1-a and RPBii multiFASTA files.</p>
+<p>To increase space, I removed the copied fasta's and created a symlink to the originals.</p>
+<pre><code class="language-bash"><span class="hljs-comment">#remove copies</span>
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> $(<span class="hljs-built_in">cat</span> FastaList.txt); <span class="hljs-keyword">do</span> <span class="hljs-built_in">rm</span> <span class="hljs-variable">${i}</span> ; <span class="hljs-keyword">done</span>
+<span class="hljs-comment">#create link</span>
+<span class="hljs-built_in">ln</span> -s ../../data/* ./
+</code></pre>
+<p>Top scoring TEF1-a and RPBii regions were extracted from each genome manually and a single FASTA created for each sequence. These FASTAs were concatenated to generate a TEF1-a and RPBii multiFASTA files.</p>
+<pre><code class="language-bash"><span class="hljs-comment">#example for manual extraction</span>
+grep -v <span class="hljs-string">&quot;partial&quot;</span> Ena-RPB2_vs_F._oxysporum_Fo47.blastn.outfmt6.evalue_used_1e-6.out | column -t <span class="hljs-comment">#check the top scoring hits for full length sequences and ensure they are in a similar location and full length query.</span>
+
+samtools faidx F._oxysporum_Fo47.fna <span class="hljs-comment"># index the fasta</span>
+
+samtools faidx F._oxysporum_Fo47.fna CP052042.1_Fusarium_oxysporum_Fo47_chromosome_V:3933350-3935771 &gt;F._oxysporum_Fo47_RPB2.fna <span class="hljs-comment"># extract the top scoring full length hit and save to new file. </span>
+</code></pre>
 <pre><code class="language-bash"><span class="hljs-comment"># I looped through each directory, as they all started with an &quot;F&quot; and the file ending for each extracted barcode was the same. </span>
 
 <span class="hljs-comment"># tef</span>
-<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> F* ; <span class="hljs-keyword">do</span> <span class="hljs-built_in">cat</span> <span class="hljs-variable">${i}</span>/*._TEF.fna &gt;&gt; Fusarium_TEF.fna ; <span class="hljs-keyword">done</span> 
+<span class="hljs-built_in">cd</span> ../../TEF
+<span class="hljs-built_in">cd</span> BigBlast*
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> F* ; <span class="hljs-keyword">do</span> awk <span class="hljs-string">&#x27;/&gt;/{sub(&quot;&gt;&quot;,&quot;&amp;&quot;FILENAME&quot;_&quot;);sub(/\.fna/,x)}1&#x27;</span> <span class="hljs-variable">${i}</span>/*_TEF.fna &gt;&gt; Fusarium_TEF.fna ; <span class="hljs-keyword">done</span> 
 
 <span class="hljs-comment">#rbp2</span>
-<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> F* ; <span class="hljs-keyword">do</span> <span class="hljs-built_in">cat</span> <span class="hljs-variable">${i}</span>/*._RBP2.fna &gt;&gt; Fusarium_RBP2.fna ; <span class="hljs-keyword">done</span> 
-</code></pre>
-<h2 id="mafft-alignment">MAFFT alignment</h2>
-<p>Before alignment, the barcodes sequences from the novel species <a href="https://www.mdpi.com/2309-608X/9/4/443">F. mindanaoense</a> were added.</p>
-<p>MAFFT (v7.505) was used align the sequences in the concatenated FASTA, with the command in the shell script <code>MafftCommand.sh</code></p>
-<pre><code class="language-bash"><span class="hljs-comment"># tef</span>
+<span class="hljs-built_in">cd</span> ../../RPBii
+<span class="hljs-built_in">cd</span> BigBlast*
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> F* ; <span class="hljs-keyword">do</span> awk <span class="hljs-string">&#x27;/&gt;/{sub(&quot;&gt;&quot;,&quot;&amp;&quot;FILENAME&quot;_&quot;);sub(/\.fna/,x)}1&#x27;</span> <span class="hljs-variable">${i}</span>/*_RPB2.fna &gt;&gt; Fusarium_RPB2.fna ; <span class="hljs-keyword">done</span>
+``B
+
+<span class="hljs-comment">## MAFFT alignment</span>
+
+Before alignment, the barcodes sequences from the novel species [F. mindanaoense](https://www.mdpi.com/2309-608X/9/4/443) were added.
+
+MAFFT (v7.505) was used align the sequences <span class="hljs-keyword">in</span> the concatenated FASTA, with the <span class="hljs-built_in">command</span> <span class="hljs-keyword">in</span> the shell script `MafftCommand.sh`
+
+```bash
+<span class="hljs-comment"># tef</span>
 MafftCommand.sh Fusarium_TEF.fna
 
 <span class="hljs-comment"># rbp2</span>
-MafftCommand.sh Fusarium_RBP2.fna
+MafftCommand.sh Fusarium_RPB2.fna
 </code></pre>
 <p>Overhanging sequences were trimmed manually, and the trimmed output saved for each barcode into a new FASTA files. Some of the isolate names were altered to shorten them, as MAFFT can sometimes trim off longer names.</p>
 <h2 id="iqtree2-analysis">IQtree2 Analysis</h2>
@@ -79,9 +107,9 @@ MafftCommand.sh Fusarium_RBP2.fna
 Iqtree2Command.sh Fusarium_TEF_Additional_Genomes_MAFFT.msa Fusarium_Additional_Species_TEF
 
 <span class="hljs-comment">#rbp2</span>
-Iqtree2Command.sh  Fusarium_RPB2-MAFFTaln.Phylogeny2.msa Fusarium_RPB2-MAFFTaln.Phylogeny2.msa
+Iqtree2Command.sh  RPBii-Trimmed.fasta RPBii-iqtree2Phylogeny
 </code></pre>
-<p>Phylogenies were then visualised and annotated using <a href="https://itol.embl.de">iTOL</a></p>
+<p>Phylogenies were then visualised and annotated using <a href="https://itol.embl.de">iTOL</a>.</p>
 
         <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
         

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>SIX gene prediction and phylogenies</title>
+        <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+        
+    </head>
+    <body class="vscode-body vscode-light">
+        <h1 id="six-gene-prediction-and-phylogenies">SIX gene prediction and phylogenies</h1>
+<h2 id="six-gene-identification">SIX gene identification</h2>
+<p><em>SIX</em> genes were identified in the <em>Fusarium</em> assemblies using tBLASTn. A reference set of <em>SIX</em> genes using in [this paper] were downloaded from NCBI.</p>
+<table>
+<thead>
+<tr>
+<th><strong><em>SIX gene</em></strong></th>
+<th><strong>Genbank Reference</strong></th>
+<th><strong>Isolate</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>SIX1</em></td>
+<td>AJ608702.1</td>
+<td>Foly</td>
+</tr>
+<tr>
+<td><em>SIX2</em></td>
+<td>GQ268949.1</td>
+<td>Foly_BFOL-51</td>
+</tr>
+<tr>
+<td><em>SIX3</em></td>
+<td>AM234063.1</td>
+<td>Foly</td>
+</tr>
+<tr>
+<td><em>SIX4</em></td>
+<td>GQ268951.1</td>
+<td>Foly_BFOL-51</td>
+</tr>
+<tr>
+<td><em>SIX5</em></td>
+<td>GQ268952.1</td>
+<td>Foly_BFOL-51_5</td>
+</tr>
+<tr>
+<td><em>SIX6</em></td>
+<td>GQ268953.1</td>
+<td>Foly_BFOL-51</td>
+</tr>
+<tr>
+<td><em>SIX7</em></td>
+<td>GQ268954.1</td>
+<td>Foly_BFOL-51_7</td>
+</tr>
+<tr>
+<td><em>SIX8</em></td>
+<td>FJ755837.1</td>
+<td>Foly_007</td>
+</tr>
+<tr>
+<td><em>SIX9</em></td>
+<td>KC701447.1</td>
+<td>Foly_007</td>
+</tr>
+<tr>
+<td><em>SIX10</em></td>
+<td>KC701448.1</td>
+<td>Foly_007</td>
+</tr>
+<tr>
+<td><em>SIX11</em></td>
+<td>KC701449.1</td>
+<td>Foly_007</td>
+</tr>
+<tr>
+<td><em>SIX12</em></td>
+<td>KC701450.1</td>
+<td>Foly_007</td>
+</tr>
+<tr>
+<td><em>SIX13</em></td>
+<td>KC701451.1</td>
+<td>Foly_007</td>
+</tr>
+<tr>
+<td><em>SIX14</em></td>
+<td>KC701452.1</td>
+<td>Foly_007</td>
+</tr>
+<tr>
+<td><em>SIX15</em></td>
+<td>KY073750.1</td>
+<td>Foly_1943</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-bash">BigBlast.sh -q SIX_lycopersici.fasta -g FastaList.txt -i 1 -c 1 -t tblastn -b 
+</code></pre>
+<p>Top scoring SIX gene regions were extracted from each genome manually and a FASTA created for each gene sequence. These FASTAs were concatenated to generate a multiFASTA files for each <em>SIX</em> gene.</p>
+<pre><code class="language-bash"><span class="hljs-comment"># example of manual extraction</span>
+<span class="hljs-comment"># move into dir.</span>
+<span class="hljs-built_in">cd</span> F._oxysporum_f._sp._cepae_FoC_Fus2
+<span class="hljs-comment"># examine the output, including locations</span>
+<span class="hljs-built_in">cat</span> SIX_lycopersici_vs_F._oxysporum_f._sp._cepae_FoC_Fus2.hits_within_threshold.bed 
+<span class="hljs-comment"># create fasta index.</span>
+samtools faidx F._oxysporum_f._sp._cepae_FoC_Fus2.fna 
+<span class="hljs-comment"># extract and view the sequence.</span>
+samtools faidx F._oxysporum_f._sp._cepae_FoC_Fus2.fna MRCU01000010.1_Fusarium_oxysporum_f._sp._cepae_strain_FoC_Fus2_contig_10,_whole_genome_shotgun_sequence:809491-809836 
+<span class="hljs-comment"># save the sequence into a fasta file.</span>
+samtools faidx F._oxysporum_f._sp._cepae_FoC_Fus2.fna MRCU01000010.1_Fusarium_oxysporum_f._sp._cepae_strain_FoC_Fus2_contig_10,_whole_genome_shotgun_sequence:809491-809836 &gt; F._oxysporum_f._sp._cepae_FoC_Fus2_SIX9.fasta 
+</code></pre>
+<p>I then created a multifasta file containing all copies of each <em>SIX</em> gene from the assemblies.</p>
+<pre><code class="language-bash"><span class="hljs-comment"># generate SIX1 fasta</span>
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> F* ; <span class="hljs-keyword">do</span> awk <span class="hljs-string">&#x27;/&gt;/{sub(&quot;&gt;&quot;,&quot;&amp;&quot;FILENAME&quot;_&quot;);sub(/\.fna/,x)}1&#x27;</span> <span class="hljs-variable">${i}</span>/*SIX1.fasta &gt;&gt; FusSIX1.fasta; <span class="hljs-keyword">done</span>
+
+<span class="hljs-comment"># generate six2 fasta</span>
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> F* ; <span class="hljs-keyword">do</span> awk <span class="hljs-string">&#x27;/&gt;/{sub(&quot;&gt;&quot;,&quot;&amp;&quot;FILENAME&quot;_&quot;);sub(/\.fna/,x)}1&#x27;</span> <span class="hljs-variable">${i}</span>/*SIX2.fasta &gt;&gt; FusSIX2.fasta; <span class="hljs-keyword">done</span>
+
+<span class="hljs-comment"># generate six4 fasta</span>
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> F* ; <span class="hljs-keyword">do</span> awk <span class="hljs-string">&#x27;/&gt;/{sub(&quot;&gt;&quot;,&quot;&amp;&quot;FILENAME&quot;_&quot;);sub(/\.fna/,x)}1&#x27;</span> <span class="hljs-variable">${i}</span>/*SIX4.fasta &gt;&gt; FusSIX4.fasta; <span class="hljs-keyword">done</span>
+
+<span class="hljs-comment"># generate six6 fasta</span>
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> F* ; <span class="hljs-keyword">do</span> awk <span class="hljs-string">&#x27;/&gt;/{sub(&quot;&gt;&quot;,&quot;&amp;&quot;FILENAME&quot;_&quot;);sub(/\.fna/,x)}1&#x27;</span> <span class="hljs-variable">${i}</span>/*SIX6.fasta &gt;&gt; FusSIX6.fasta; <span class="hljs-keyword">done</span>
+
+<span class="hljs-comment"># generate six9 fasta</span>
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> F* ; <span class="hljs-keyword">do</span> awk <span class="hljs-string">&#x27;/&gt;/{sub(&quot;&gt;&quot;,&quot;&amp;&quot;FILENAME&quot;_&quot;);sub(/\.fna/,x)}1&#x27;</span> <span class="hljs-variable">${i}</span>/*SIX9.fasta &gt;&gt; FusSIX9.fasta; <span class="hljs-keyword">done</span>
+</code></pre>
+<p>I then aligned each fasta file using the <code>MafftCommand.sh</code> shell script.</p>
+<pre><code class="language-bash"><span class="hljs-comment"># loop through the fasta and align each. </span>
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> FusSIX* ; <span class="hljs-keyword">do</span> <span class="hljs-built_in">echo</span> Processing <span class="hljs-variable">$i</span> ; ../../../../../bin/MafftCommand.sh <span class="hljs-variable">${i}</span> ; <span class="hljs-built_in">echo</span> <span class="hljs-keyword">done</span>. ; <span class="hljs-keyword">done</span>
+</code></pre>
+<p>I then trimmed the alignments manually before the iqtree2 analysis. Further, these sequence headers are too long for Iqtree2, so i trimmed the fasta headers manually.</p>
+<pre><code class="language-bash"><span class="hljs-comment"># loop through files for iqtree2</span>
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> FusSIX*.aln ; <span class="hljs-keyword">do</span> <span class="hljs-built_in">echo</span> Processing <span class="hljs-variable">$i</span> ; ../../../../../bin/Iqtree2Command.sh <span class="hljs-variable">${i}</span> <span class="hljs-variable">${i}</span>.phylo ; <span class="hljs-built_in">echo</span> <span class="hljs-keyword">done</span>. ; <span class="hljs-keyword">done</span>
+</code></pre>
+<p>I tidied up the directory next by making a directory for each <em>SIX</em> gene.</p>
+<pre><code class="language-bash"><span class="hljs-comment"># make dirs</span>
+<span class="hljs-built_in">mkdir</span> -p phylos SIX1Phylo SIX2Phylo SIX4Phylo SIX6Phylo SIX9Phylo
+
+<span class="hljs-comment"># move files</span>
+<span class="hljs-built_in">mv</span> FusSIX1.* ./SIX1Phylo/
+<span class="hljs-built_in">mv</span> FusSIX2.* ./SIX2Phylo/
+<span class="hljs-built_in">mv</span> FusSIX4.* ./SIX4Phylo/
+<span class="hljs-built_in">mv</span> FusSIX6.* ./SIX6Phylo/
+<span class="hljs-built_in">mv</span> FusSIX9.* ./SIX9Phylo/
+<span class="hljs-built_in">mv</span> *Phylo ./phylos/
+<span class="hljs-built_in">mv</span> phylos/ ../
+</code></pre>
+<p>I realised is trimmed the SIX4 file, and ran the iqtree2 loop on the untrimmed, so repeated in the new dir.</p>
+<pre><code class="language-bash"><span class="hljs-comment">#clear out dir of iqtree2 output </span>
+<span class="hljs-built_in">rm</span> FusSIX4.fasta.aln.phylo*
+
+<span class="hljs-comment">#rerun iqtree2</span>
+../../../../../../bin/Iqtree2Command.sh FusSIX4-trimmed.fasta.aln.fa FusSIX4-trimmed.phylo
+</code></pre>
+<p>I then visualised the trees using <a href="https://itol.embl.de">iTol</a>.</p>
+
+        <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+        
+    </body>
+    </html>
