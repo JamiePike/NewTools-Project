@@ -129,6 +129,8 @@ mv S32_V5-FS66-Contiglabelled.FullMask.all.maker.proteins.sizeFilter.fasta-signa
 mv SY-2_V5-RepeatMasked.all.maker.proteins.sizeFilter.fasta-signalp.filtered.fasta-EffectorP.filtered.fasta SY-2_V5-candidateEffectors.fasta
 ```
 
+## Cd-hit clustering
+
 I then clustered the candidate effectors at 80% identity to identify shared candidates. Initially, i had to create a single fasta.
 
 ```bash
@@ -153,6 +155,12 @@ ln -s AllCandidateEffectorSets.fasta ../cdhit/
 
 cdhit -i ../effectorp/AllCandidateEffectorSets.fasta -d 0 -o ./AllCandidateEffectorSets -c 0.80 -n 5  -G 1 -g 0 -b 20 -l 10 -s 0.0 -aL 0.0 -aS 0.0 1> cd-hit.log
 ```
+
+## Orthofinder MCL
+
+Finding orthoglous groups of the candidate effectors from each TNAU assembly.
+
+### Build Venn Diagram
 
 I processed the `cd-hit` data using a custom python script, [ProcessingCdhit.py](https://github.com/JamiePike/NewTools-Project/blob/master/bin/ProcessingCdhit.py).
 
