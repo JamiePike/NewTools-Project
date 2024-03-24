@@ -1,0 +1,494 @@
+---
+title: "TNAU Six Gene Trees"
+author: "JamiePike"
+date: "2024-02-16"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r libraries, echo=FALSE, include=FALSE}
+# # ---- Install required packages ---- #
+# if (!requireNamespace("BiocManager", quietly = TRUE))
+#   install.packages("BiocManager")
+# BiocManager::install("ggtree")
+# install.packages('devtools')
+# devtools::install_github("YuLab-SMU/ggtreeExtra")
+# install.packages('tidytree')
+# install.packages('ggpubr')
+# install.packages('nortest')
+# library(devtools)
+# install_github("jokergoo/ComplexHeatmap")
+
+# ---- Load required libraries ---- #
+#for stats
+library(dplyr)
+library(tidyr)
+library(tidytree)
+library(tidyverse)
+library(dplyr)
+library(forcats)
+library(ggplot2)
+library(ggthemes)
+library(viridis)
+library(ggpubr)
+library(nortest)
+
+# for phylogeny
+library(phytools)
+library(ggtree)
+library(ggtreeExtra)
+library(ape)
+library(treeio)
+
+#for heatmaps
+library(ComplexHeatmap)
+library(textshape)
+library(RColorBrewer)
+library(ggnewscale)
+library(pheatmap)
+library(circlize)
+```
+## Build SIX gene trees for TNAU SIX gene phylogenies
+
+Phylogenies were generated as part of the NewTools project. 
+
+```{r load data}
+
+# ---- Set dirs and load files ---- #
+setwd("/Volumes/Jamie_EXT/Projects/NewToolsProject/exp/Effectors/SixGenes/SixDistributionTNAU/R")
+# Specify  path to  Newick file
+SIX1_tree_file <- "/Volumes/Jamie_EXT/Projects/NewToolsProject/exp/Effectors/SixGenes/SixDistributionTNAU/phylos/SIX1Phylo/FusSIX1.fasta.aln.phylo.treefile"
+SIX2_tree_file <-  "/Volumes/Jamie_EXT/Projects/NewToolsProject/exp/Effectors/SixGenes/SixDistributionTNAU/phylos/SIX2Phylo/FusSIX2.fasta.aln.phylo.treefile"
+SIX4_tree_file <- "/Volumes/Jamie_EXT/Projects/NewToolsProject/exp/Effectors/SixGenes/SixDistributionTNAU/phylos/SIX4Phylo/FusSIX4-trimmed.phylo.treefile"
+SIX6_tree_file <- "/Volumes/Jamie_EXT/Projects/NewToolsProject/exp/Effectors/SixGenes/SixDistributionTNAU/phylos/SIX6Phylo/FusSIX6.fasta.aln.phylo.treefile"
+SIX9_tree_file <- "/Volumes/Jamie_EXT/Projects/NewToolsProject/exp/Effectors/SixGenes/SixDistributionTNAU/phylos/SIX9Phylo/FusSIX9-trimmed.phylo.treefile"
+# Load phylogeny meta date from the CSV file
+metadata <- read.csv("./PhyloMetaData.csv") 
+
+```
+After loading my data, I prepared it for subsequent analysis. The metadata and heatmap data are currently in .csv format, but that saves empty cells as "", and I want them to be `NA` values (particularly the metadata). I also added columns which contains the "full name" for each genome assembly, where full name is the genus (abbreviated), species, and forma speciales (fsp). 
+
+```{r prepare metadata}
+# ---- prepare metadata ---- #
+# ensure its a df
+metadata <- as.data.frame(metadata)
+# clear empty values
+metadata$fsp[metadata$fsp==""] <- NA # set empty cells in fsp column to NA
+metadata$race[metadata$race==""] <- NA # set empty cells in race column to NA
+
+#create a column for full fsp.
+metadata <- metadata %>% unite("full_name", c(species,fsp), sep = " fsp. ", remove = F, na.rm = T)
+
+#create a column for full fsp and isolate code
+metadata <- metadata %>% unite("full_ID", c(full_name,isolate_code), sep = " ", remove = F, na.rm = T)
+```
+
+```{r add metadata}
+# ---- add reference sequences ---- #
+
+# add in the reference sequences
+metadata <- metadata %>% 
+  add_row(label = "Fo._fsp._lycopersici_4287_root",full_ID = "F. oxysporum fsp. lycopersici 4287", full_name = "F. oxysporum fsp. lycopersici", fsp = "lycopersici", race = "Race 2", source = "NCBI", .before = 1) 
+
+metadata <- metadata %>% 
+  add_row(label = "Fo._fsp._conglutinans_Fo5176_root", full_ID = "Fo. fsp. conglutinans Fo5176", full_name = "F. oxysporum fsp. conglutinans", fsp = "conglutinans", race = NA,  source = "NCBI", .before = 2)
+
+# build df for fsp so we can add it as a colour scale to the tree
+fsp_df <- data.frame("full_name" = metadata[,c("full_name")] )
+rownames(fsp_df) <- metadata$label
+
+```
+
+## SIX1 tree
+
+```{r prep SIX1 tree, fig.width= 20}
+# ---- Prepare the tree ---- #
+# Read the phylogenetic tree from the Newick file
+SIX1_unrootedtree <- read.newick(SIX1_tree_file, node.label='label' )
+# root the tree
+SIX1_tree <- root(SIX1_unrootedtree, outgroup = c("Fo._fsp._lycopersici_4287_root"))
+
+#lets drop the tips from the fsp not indcluded in the maie analysis but included in the NIAB project
+# first make the tree data a data frame
+SIX1_tree_df <- SIX1_tree %>% as_tibble()
+
+# keep only the species names for now
+SIX1_tree_df1 <- SIX1_tree_df %>% 
+  filter(grepl("^Fo\\.[^0-9]", label))
+
+# now find the differences between the two data frames
+tips_to_remove <- setdiff(SIX1_tree_df1$label, metadata$label)
+# prune teh tree
+SIX1_tree_pruned <- drop.tip(SIX1_tree, tips_to_remove)
+
+# ---- Build tree skeleton ---- #
+p <- ggtree(SIX1_tree_pruned, ladderize = F)  %<+% metadata
+
+
+# ---- View the tree ---- #
+# Useful for visualusing nodes etc 
+p_nodes <- p + 
+  geom_point(data = td_filter(isTip %in% metadata$label)) +
+   geom_tiplab(aes(label = label), offset = 0.005) + 
+  geom_text2(aes(label = parent), hjust = -0.1, size = 3)+ # add node names
+  coord_cartesian(clip = "off") # stop names being trimmed off
+
+```
+Now I have my basic tree, I can start to build something that will stand alone. First I added the metadata (full name, the isolate code, and race).
+
+```{r SIX1 tree, results= 'hide', fig.height= 20, fig.width= 10}
+
+# ---- Build the tree plot ---- #
+
+p2 <- p + 
+  geom_treescale(x = 0, y = -0.5, width = 0.1) + 
+  geom_tiplab(aes(label = full_ID), offset = 0.005) +
+  geom_tiplab(aes(label = race), color = "grey20", offset = 0.2, linetype = "blank", geom = "text", align = TRUE, hjust = 1)+
+  geom_tippoint(aes(shape = source), size = 2.5) +
+  geom_rootedge() +
+  theme(legend.position = "bottom" ) +
+  geom_nodelab(geom='label', aes(label=label, subset= !is.na(as.numeric(label)) & as.numeric(label)> 60), nudge_x = -0.0012, nudge_y = -0.25) 
+
+# Add extra scale so we can plot fsp with colour
+p3 <- p2 + new_scale_fill()
+
+# add race data
+p4 <- gheatmap(p3, fsp_df,
+               offset = 0.2, 
+               width = 0.03,
+               color = "grey20",
+               colnames = FALSE) +
+  scale_fill_manual(name = "Forma specialis",
+                    values = c( "blue", "goldenrod", "grey90","gold", "brown", "tomato", "steelblue", "red"), na.value = "grey") +
+  theme(legend.position = "bottom",
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 9),
+        legend.box = "vertical", legend.margin = margin())+
+  guides(shape = guide_legend(override.aes = list(size = 5))) 
+
+
+```
+
+Now plot and save it. 
+
+```{r SIX1 plot}
+# plot it 
+plot(p4)
+
+##save basic tree 
+ggsave("/Volumes/Jamie_EXT/Projects/NewToolsProject/exp/Effectors/SixGenes/SixDistributionTNAU/R/FusSIX1.phylo.png", width = 12, height = 13)
+```
+
+## SIX2 tree
+
+```{r prep SIX2 tree, fig.width= 20}
+# ---- Prepare the tree ---- #
+# Read the phylogenetic tree from the Newick file
+SIX2_unrootedtree <- read.newick(SIX2_tree_file, node.label='label' )
+# root the tree
+SIX2_tree <- root(SIX2_unrootedtree, outgroup = c("Fo._fsp._lycopersici_4287_root"))
+
+#lets drop the tips from the fsp not indcluded in the maie analysis but included in the NIAB project
+# first make the tree data a data frame
+SIX2_tree_df <- SIX2_tree %>% as_tibble()
+
+# keep only the species names for now
+SIX2_tree_df1 <- SIX2_tree_df %>% 
+  filter(grepl("^Fo\\.[^0-9]", label))
+
+# now find the differences between the two data frames
+tips_to_remove <- setdiff(SIX2_tree_df1$label, metadata$label)
+# prune teh tree
+SIX2_tree_pruned <- drop.tip(SIX2_tree, tips_to_remove)
+
+# ---- Build tree skeleton ---- #
+p <- ggtree(SIX2_tree_pruned, ladderize = F)  %<+% metadata
+
+
+# ---- View the tree ---- #
+# Useful for visualusing nodes etc 
+p_nodes <- p + 
+  geom_tiplab(aes(label = full_name), offset = 0.05) + 
+  geom_text2(aes(label = node), hjust = -0.1, size = 3, offeset =0.02)+ # add node names
+  coord_cartesian(clip = "off") # stop names being trimmed off
+
+```
+Now I have my basic tree, I can start to build something that will stand alone. First I added the metadata (full name, the isolate code, and race).
+
+```{r SIX2 tree, results= 'hide', fig.height= 20, fig.width= 10}
+
+# ---- Build the tree plot ---- #
+
+p2 <- p + 
+  geom_treescale(x = 0, y = -0.5, width = 0.1) + 
+  geom_tiplab(aes(label = full_ID), offset = 0.005) +
+  geom_tiplab(aes(label = race), color = "grey20", offset = 0.15, linetype = "blank", geom = "text", align = TRUE, hjust = 1)+
+  geom_tippoint(aes(shape = source), size = 2.5) +
+  geom_rootedge() +
+  theme(legend.position = "bottom" ) +
+  geom_nodelab(geom='label', aes(label=label, subset= !is.na(as.numeric(label)) & as.numeric(label)> 60), nudge_x = -0.005, nudge_y = -0.1) 
+
+# Add extra scale so we can plot fsp with colour
+p3 <- p2 + new_scale_fill()
+
+# add race data
+p4 <- gheatmap(p3, fsp_df,
+               offset = 0.151, 
+               width = 0.03,
+               color = "grey20",
+               colnames = FALSE) +
+  scale_fill_manual(name = "Forma specialis",
+                    values = c("gold","tomato","pink","red"), na.value = "grey") +
+  theme(legend.position = "bottom",
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 9),
+        legend.box = "vertical", legend.margin = margin())+
+  guides(shape = guide_legend(override.aes = list(size = 5))) 
+
+
+```
+
+Now plot and save it. 
+
+```{r SIX2 plot}
+# plot it 
+plot(p4)
+
+##save basic tree 
+ggsave("/Volumes/Jamie_EXT/Projects/NewToolsProject/exp/Effectors/SixGenes/SixDistributionTNAU/R/FusSIX2.phylo.png", width = 10, height = 11.5)
+```
+
+
+## SIX4 tree
+
+```{r prep SIX4 tree, fig.width= 20}
+# ---- Prepare the tree ---- #
+# Read the phylogenetic tree from the Newick file
+SIX4_unrootedtree <- read.newick(SIX4_tree_file, node.label='label' )
+# root the tree
+SIX4_tree <- root(SIX4_unrootedtree, outgroup = c("Fo._fsp._conglutinans_Fo5176_root"))
+
+#lets drop the tips from the fsp not indcluded in the maie analysis but included in the NIAB project
+# first make the tree data a data frame
+SIX4_tree_df <- SIX4_tree %>% as_tibble()
+
+# keep only the species names for now
+SIX4_tree_df1 <- SIX4_tree_df %>% 
+  filter(grepl("^Fo\\.[^0-9]", label))
+
+# now find the differences between the two data frames
+tips_to_remove <- setdiff(SIX4_tree_df1$label, metadata$label)
+# prune teh tree
+SIX4_tree_pruned <- drop.tip(SIX4_tree, tips_to_remove)
+
+# ---- Build tree skeleton ---- #
+p <- ggtree(SIX4_tree_pruned, ladderize = F)  %<+% metadata
+
+
+# ---- View the tree ---- #
+# Useful for visualusing nodes etc 
+p_nodes <- p + 
+  geom_tiplab(aes(label = full_name), offset = 0.05) + 
+  geom_text2(aes(label = node), hjust = -0.1, size = 3, offeset =0.02)+ # add node names
+  coord_cartesian(clip = "off") # stop names being trimmed off
+
+```
+
+```{r SIX4 tree, results= 'hide', fig.height= 20, fig.width= 10}
+
+# ---- Build the tree plot ---- #
+
+p2 <- p + 
+  geom_treescale(x = 0, y = -0.5, width = 0.1) + 
+  geom_tiplab(aes(label = full_ID), offset = 0.005) +
+  geom_tiplab(aes(label = race), color = "grey20", offset = 0.75, linetype = "blank", geom = "text", align = TRUE, hjust = 1)+
+  geom_tippoint(aes(shape = source), size = 2.5) +
+  geom_rootedge() +
+  theme(legend.position = "bottom" ) +
+  geom_nodelab(geom='label', aes(label=label, subset= !is.na(as.numeric(label)) & as.numeric(label)> 60)) 
+
+# Add extra scale so we can plot fsp with colour
+p3 <- p2 + new_scale_fill()
+
+# add race data
+p4 <- gheatmap(p3, fsp_df,
+               offset = 0.75, 
+               width = 0.03,
+               color = "grey20",
+               colnames = FALSE) +
+  scale_fill_manual(name = "Forma specialis",
+                    values = c("goldenrod","gold", "red"), na.value = "grey") +
+  theme(legend.position = "bottom",
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 9),
+        legend.box = "vertical", legend.margin = margin())+
+  guides(shape = guide_legend(override.aes = list(size = 5))) 
+
+
+```
+
+Now plot it 
+
+```{r SIX4 plot}
+# plot it 
+plot(p4)
+
+##save basic tree 
+ggsave("/Volumes/Jamie_EXT/Projects/NewToolsProject/exp/Effectors/SixGenes/SixDistributionTNAU/R/FusSIX4.phylo.png", width = 10, height = 6)
+```
+
+
+## SIX6 tree
+
+```{r prep SIX6 tree, fig.width= 20}
+# ---- Prepare the tree ---- #
+# Read the phylogenetic tree from the Newick file
+SIX6_unrootedtree <- read.newick(SIX6_tree_file, node.label='label' )
+# root the tree
+SIX6_tree <- root(SIX6_unrootedtree, outgroup = c("Fo._fsp._lycopersici_4287_root"))
+
+#lets drop the tips from the fsp not indcluded in the maie analysis but included in the NIAB project
+# first make the tree data a data frame
+SIX6_tree_df <- SIX6_tree %>% as_tibble()
+
+# keep only the species names for now
+SIX6_tree_df1 <- SIX6_tree_df %>% 
+  filter(grepl("^Fo\\.[^0-9]", label))
+
+# now find the differences between the two data frames
+tips_to_remove <- setdiff(SIX6_tree_df1$label, metadata$label)
+# prune teh tree
+SIX6_tree_pruned <- drop.tip(SIX6_tree, tips_to_remove)
+
+# ---- Build tree skeleton ---- #
+p <- ggtree(SIX6_tree_pruned, ladderize = F)  %<+% metadata
+
+
+# ---- View the tree ---- #
+# Useful for visualusing nodes etc 
+p_nodes <- p + 
+  geom_tiplab(aes(label = full_name), offset = 0.05) + 
+  geom_text2(aes(label = node), hjust = -0.1, size = 3, offeset =0.02)+ # add node names
+  coord_cartesian(clip = "off") # stop names being trimmed off
+
+```
+
+```{r SIX6 tree, results= 'hide', fig.height= 20, fig.width= 10}
+
+# ---- Build the tree plot ---- #
+
+p2 <- p + 
+  geom_treescale(x = 0, y = -0.5, width = 0.1) + 
+  geom_tiplab(aes(label = full_ID), offset = 0.005) +
+  geom_tiplab(aes(label = race), color = "grey20", offset = 0.25, linetype = "blank", geom = "text", align = TRUE, hjust = 1)+
+  geom_tippoint(aes(shape = source), size = 2.5) +
+  geom_rootedge() +
+  theme(legend.position = "bottom" ) +
+  geom_nodelab(geom='label', aes(label=label, subset= !is.na(as.numeric(label)) & as.numeric(label)>60)) 
+
+# Add extra scale so we can plot fsp with colour
+p3 <- p2 + new_scale_fill()
+
+# add race data
+p4 <- gheatmap(p3, fsp_df,
+               offset = 0.251, 
+               width = 0.03,
+               color = "grey20",
+               colnames = FALSE) +
+  scale_fill_manual(name = "Forma specialis",
+                    values = c("gold","tomato", "red"), na.value = "grey") +
+  theme(legend.position = "bottom",
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 9),
+        legend.box = "vertical", legend.margin = margin())+
+  guides(shape = guide_legend(override.aes = list(size = 5))) 
+
+
+```
+
+```{r SIX6 plot}
+# plot it 
+plot(p4)
+
+##save basic tree 
+ggsave("/Volumes/Jamie_EXT/Projects/NewToolsProject/exp/Effectors/SixGenes/SixDistributionTNAU/R/FusSIX6.phylo.png", width = 10, height = 6)
+```
+
+## SIX9 tree
+
+```{r prep SIX9 tree, fig.width= 20}
+# ---- Prepare the tree ---- #
+# Read the phylogenetic tree from the Newick file
+SIX9_unrootedtree <- read.newick(SIX9_tree_file, node.label='label' )
+# root the tree
+SIX9_tree <- root(SIX9_unrootedtree, outgroup = c("Fo._fsp._lycopersici_4287_root"))
+
+#lets drop the tips from the fsp not indcluded in the maie analysis but included in the NIAB project
+# first make the tree data a data frame
+SIX9_tree_df <- SIX9_tree %>% as_tibble()
+
+# keep only the species names for now
+SIX9_tree_df1 <- SIX9_tree_df %>% 
+  filter(grepl("^Fo\\.[^0-9]", label))
+
+# now find the differences between the two data frames
+tips_to_remove <- setdiff(SIX9_tree_df1$label, metadata$label)
+# prune teh tree
+SIX9_tree_pruned <- drop.tip(SIX9_tree, tips_to_remove)
+
+# ---- Build tree skeleton ---- #
+p <- ggtree(SIX9_tree_pruned, ladderize = F)  %<+% metadata
+
+
+# ---- View the tree ---- #
+# Useful for visualusing nodes etc 
+p_nodes <- p + 
+  geom_tiplab(aes(label = full_name), offset = 0.05) + 
+  geom_text2(aes(label = node), hjust = -0.1, size = 3, offeset =0.02)+ # add node names
+  coord_cartesian(clip = "off") # stop names being trimmed off
+
+```
+
+```{r SIX9 tree, results= 'hide', fig.height= 20, fig.width= 10}
+
+# ---- Build the tree plot ---- #
+
+p2 <- p + 
+  geom_treescale(x = 0, y = -0.5, width = 0.1) + 
+  geom_tiplab(aes(label = full_ID), offset = 0.005) +
+  geom_tiplab(aes(label = race), color = "grey20", offset = 0.7, linetype = "blank", geom = "text", align = TRUE, hjust = 1)+
+  geom_tippoint(aes(shape = source), size = 2.5) +
+  geom_rootedge() +
+  theme(legend.position = "bottom" ) +
+  geom_nodelab(geom='label', aes(label=label, subset= !is.na(as.numeric(label)) & as.numeric(label)>60), nudge_x = -0.025, nudge_y = -0.25) 
+
+# Add extra scale so we can plot fsp with colour
+p3 <- p2 + new_scale_fill()
+
+# add race data
+p4 <- gheatmap(p3, fsp_df,
+               offset = 0.71, 
+               width = 0.03,
+               color = "grey20",
+               colnames = FALSE) +
+  scale_fill_manual(name = "Forma specialis",
+                    values = c("blue", "purple", "goldenrod", "grey90", "gold",  "brown", "tomato", "darkorchid4", "steelblue", "red"), na.value = "grey") +
+  theme(legend.position = "bottom",
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 9),
+        legend.box = "vertical", legend.margin = margin())+
+  guides(shape = guide_legend(override.aes = list(size = 5))) 
+
+
+```
+
+```{r SIX9 plot}
+# plot it 
+plot(p4)
+
+##save basic tree 
+ggsave("/Volumes/Jamie_EXT/Projects/NewToolsProject/exp/Effectors/SixGenes/SixDistributionTNAU/R/FusSIX9.phylo.png", width = 11.5, height = 14)
+```
