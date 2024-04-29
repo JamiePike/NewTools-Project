@@ -22,7 +22,7 @@
 
 Isolate raw data supplied on 24/2/23, by Dr Raveendran Muthurajan and downloaded directly from ONEMOMICS via sftp.
 
->![Email form Raveendran detailing the source of the TNAU raw read data for download.](TNAU-Email.png)
+
 
 Isolates sequenced using ONEOMICS using Illumina 1.9 PE (PLATFORM?)
 
